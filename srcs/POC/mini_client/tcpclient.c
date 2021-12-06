@@ -53,7 +53,7 @@ int     main(int argc, char **argv)
 		err_n_die( "connect failed!" );
 
 	// create a line to send.
-	sprintf(sendline, "GET / HTTP/1.1\r\n\r\n");	 // "i want a page"
+	sprintf(sendline, "GET / HTTP/1.1\nHost: google.com\r\n\r\n");	 // "i want a page"
 	sendbytes = strlen(sendline);
 
 	//Send the request
