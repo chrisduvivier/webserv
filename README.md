@@ -8,12 +8,20 @@ TODO
 Read fantastic [guide](https://www.notion.so/Documentation-Webserv-320727979ffd4176a7dd5ba41aaadf46) made by former 42 students (written in French). Some take away from this guide:
 - [How to build a web client](https://www.youtube.com/watch?v=bdIiTxtMaKA&list=PL9IEJIKnBJjH_zM5LnovnoaKlXML5qh17&index=2) (Our `tcpclient.c` in the POC/mini_client folder is based on this video)
 - [How to build a web server]: see POC in the documentation
-- [How to select for having non-blocking server]: see POC in the documentation
+- [How to use select for having a non-blocking i/o server]: see POC in the documentation
+
+One of the most detailed example program for non-blocking select: [example of IBM here](https://www.ibm.com/docs/en/i/7.2?topic=designs-example-nonblocking-io-select)
+
+Guide to Networking: [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/html/#pollman) -> maybe use it as a reference book.
+
+About Multiplexing: [Select vs Poll](https://devarea.com/linux-io-multiplexing-select-vs-poll-vs-epoll/?sfw=pass1639486423#.YbiT3BNKjUI) -> In a nutshell: poll is more efficient than select. select is more portable, as some Unix systems do not support poll.
+
+- [DWise1's Sockets Programming Pages Dealing With and Getting Around Blocking Sockets] (http://dwise1.net/pgm/sockets/blocking.html#NONBLOCK)
 
 ## Server Side
-[ ] create a server-like program that listen for HTML request.
-[ ] make the server setup ports and maybe other things like servername FROM a config file (like nginx) 
-[ ] 
+- [ ] create a server-like program that listen for HTML request.
+- [ ] make the server setup ports and maybe other things like servername FROM a config file (like nginx) 
+- [ ] 
 
 ## Client Side
 
