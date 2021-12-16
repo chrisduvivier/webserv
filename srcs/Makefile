@@ -1,6 +1,6 @@
-NAME		=	webserv
+NAME		=	webserv.out
 
-SRCS		=	main.cpp	\
+SRCS		=	server_main.cpp	\
 
 CPP			=	clang++
 
