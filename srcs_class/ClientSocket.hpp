@@ -1,0 +1,19 @@
+#ifndef CLIENT_SOCKET_HPP
+# define CLIENT_SOCKET_HPP
+
+# include "SimpleSocket.hpp"
+
+# define BUFFER_SIZE 1024
+
+class ClientSocket : public SimpleSocket
+{
+	public:
+		ClientSocket(int port, u_long interface = INADDR_ANY, int domain = AF_INET, int service = SOCK_STREAM, int protocol = 0) : 
+			SimpleSocket(port, interface, domain, service, protocol) {};
+		
+		// throw exception on error
+		int		init();
+		int		run();
+};
+
+#endif

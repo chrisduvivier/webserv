@@ -17,22 +17,18 @@ class SimpleSocket
 {
 	public:
 		//constructor
-		SimpleSocket(int domain, int service, int protocol, int port, u_long interface);
+		SimpleSocket(int port, u_long interface, int domain, int service, int protocol);
 
-		void	establish_socket(int domain, int service, int protocol);
+		int	establish_socket(int domain, int service, int protocol);
 
 		struct sockaddr_in  get_address(void);
 		int                 get_sock(void);
 		int                 get_connection(void);
 
-		
-	
-	private:
+	protected:
 		struct sockaddr_in  _address;
 		int                 _sock;
 		int                 _connection;
-}
-
-
+};
 
 #endif
