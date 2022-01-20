@@ -3,6 +3,8 @@
 
 # include "SimpleSocket.hpp"
 # include <fcntl.h>
+# include <sys/select.h>
+# include <sys/time.h>
 
 class ServerSocket : public SimpleSocket
 {
