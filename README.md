@@ -18,10 +18,13 @@ About Multiplexing: [Select vs Poll](https://devarea.com/linux-io-multiplexing-s
 
 - [DWise1's Sockets Programming Pages Dealing With and Getting Around Blocking Sockets] (http://dwise1.net/pgm/sockets/blocking.html#NONBLOCK)
 
+## Getting on the HTTP Response:
+- Find out how there are defined: https://www.rfc-editor.org/rfc/rfc2616#section-4.1
+
 ## Server Side
-- [ ] create a server-like program that listen for HTML request.
+- [x] create a server-like program that listen for HTML request.
 - [ ] make the server setup ports and maybe other things like servername FROM a config file (like nginx) 
-- [ ] 
+- [ ] Define a HttpRequest(HttpMessage) class and create it when reading client request/prepare response to the client.
 
 ## Client Side
-
+- [x] Simple socket that sends request to the server

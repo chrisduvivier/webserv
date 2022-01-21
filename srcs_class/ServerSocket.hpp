@@ -6,6 +6,8 @@
 # include <sys/select.h>
 # include <sys/time.h>
 
+// # include "HttpRequest.hpp"
+
 class ServerSocket : public SimpleSocket
 {
 	public:

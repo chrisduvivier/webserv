@@ -16,15 +16,14 @@ void    ServerSocket::init()
 	}
 }
 
-// /* Set the socket to accept incoming trafic */
-// void	ServerSocket::run()
+// HttpRequest handle_client_request(char *buffer, long len)
 // {
-// 	int new_socket;
-// 	int addrlen = sizeof(_address);
-// 	if ( (new_socket = accept(_sock, (struct sockaddr *)&_address, (socklen_t*)&addrlen)) < 0)
-// 	{
-// 		throw "Error: Failed to accept socket";
-// 	}
+// 	return (HttpRequest(buffer, len));
+// }
+
+// std::string response_to_client(std::string	)
+// {
+
 // }
 
 int ServerSocket::run()
@@ -60,6 +59,10 @@ int ServerSocket::run()
 			char buffer[30000] = {0};
         	long valread = read(client_sock , buffer, 30000);
         	std::cout << "Request from client: " << buffer << std::endl;
+
+			// std::string	client_request = handle_client_request(buffer, valread);
+
+			// std::string	response = response_to_client(client_request);
 
 			// "send" with a zero flags argument is equivalent to write(2).
 			if (send(client_sock, response.c_str(), strlen(response.c_str()) , 0) == -1)
