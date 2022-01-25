@@ -2,10 +2,13 @@ SERVER_NAME		=	server.out
 CLIENT_NAME		=	client.out
 
 SRCS_SERVER		=	main_server.cpp	\
-					SimpleSocket.cpp ServerSocket.cpp
+					SimpleSocket.cpp ServerSocket.cpp \
+					HttpRequest.cpp \
+					utils.cpp \
 
 SRCS_CLIENT		=	main_client.cpp	\
-					SimpleSocket.cpp ClientSocket.cpp
+					SimpleSocket.cpp ClientSocket.cpp \
+					utils.cpp \
 
 CPP			=	clang++
 

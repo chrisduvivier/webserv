@@ -16,10 +16,11 @@ void    ServerSocket::init()
 	}
 }
 
-// HttpRequest handle_client_request(char *buffer, long len)
-// {
-// 	return (HttpRequest(buffer, len));
-// }
+HttpRequest handle_client_request(std::vector<std::string> client_request)
+{
+	HttpRequest request(client_request);
+	return (request);
+}
 
 // std::string response_to_client(std::string	)
 // {
@@ -32,15 +33,15 @@ int ServerSocket::run()
 	fd_set		working_sockets;
 	std::string	response = "HTTP/1.1 200 OK\r\n\r\n Congratulation !";
 
-	struct timeval	time;	//for timeout
-	time.tv_sec = 1;
-	time.tv_usec = 0;
-
 	FD_ZERO(&working_sockets);
 	while (true)
 	{
 		FD_SET(_sock, &working_sockets);
-		if (select(_sock + 1, &working_sockets, NULL, NULL, &time) < 0)
+
+		struct timeval	timeout;	//for timeout
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+		if (select(_sock + 1, &working_sockets, NULL, NULL, &timeout) < 0)
 		{
 			std::cerr << "error: select error" << std::endl;
 			return (-1);
@@ -56,11 +57,37 @@ int ServerSocket::run()
 				return (-1);
 			}
 			
-			char buffer[30000] = {0};
-        	long valread = read(client_sock , buffer, 30000);
-        	std::cout << "Request from client: " << buffer << std::endl;
 
-			// std::string	client_request = handle_client_request(buffer, valread);
+			// read_from_socket(client_sock);
+			
+			/* 
+			**	Instead of processing HTTPrequest one line at a time, create huge string from the retunred lines,
+			**	and process later. (TODO: check if need to adjust this function) 
+			*/
+			int		ret = 0;
+			std::vector<std::string> client_request;
+			char 	*tmp_line = NULL;
+			while (((ret = get_next_line(client_sock, &tmp_line)) >= 0) && ft_strlen(tmp_line) > 0)
+			{
+				// store the line
+				std::string line(tmp_line);
+				client_request.push_back(line);
+
+				free(tmp_line);
+				tmp_line = NULL;
+
+				// check if end of HTTP request via \r\n??????
+
+				if (ret == 0)
+					break;
+			}
+			if (ret < 0)
+			{
+				std::cerr << "error: Couldn't read from client socket" << std::endl;
+				return (-1);
+			}
+        	std::cout << "Request from client accepted" << std::endl;
+			handle_client_request(client_request);
 
 			// std::string	response = response_to_client(client_request);
 

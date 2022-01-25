@@ -16,7 +16,7 @@ int	ClientSocket::init()
 
 int ClientSocket::run()
 {
-	std::string message_to_server = "Hello from client";
+	std::string message_to_server = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	char buffer[BUFFER_SIZE] = "";
 	long valread;
 

@@ -2,11 +2,14 @@
 # define SERVER_SOCKET_HPP
 
 # include "SimpleSocket.hpp"
+
 # include <fcntl.h>
 # include <sys/select.h>
 # include <sys/time.h>
 
-// # include "HttpRequest.hpp"
+# include <vector>
+
+# include "HttpRequest.hpp"
 
 class ServerSocket : public SimpleSocket
 {
