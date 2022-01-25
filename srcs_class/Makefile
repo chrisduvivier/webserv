@@ -21,8 +21,8 @@ OBJS_SERVER		=	$(SRCS_SERVER:.cpp=.o)
 OBJS_CLIENT		=	$(SRCS_CLIENT:.cpp=.o)
 
 # defaults to server compilation
-all				:	$(SERVER_NAME)
-server			: all
+all				:	server  client
+server			: 	$(SERVER_NAME)
 $(SERVER_NAME)	:	$(OBJS_SERVER)
 				$(CPP) -o $(SERVER_NAME) $(CPPFLAGS) $(OBJS_SERVER)
 

@@ -3,13 +3,20 @@
 
 # include "SimpleSocket.hpp"
 
+class HttpRequest;
+
+# include <string>
+# include <sstream>
 # include <fcntl.h>
 # include <sys/select.h>
 # include <sys/time.h>
 
 # include <vector>
 
+# include "utils.hpp"
 # include "HttpRequest.hpp"
+
+# define REQUEST_READ_BUFFER  10256
 
 class ServerSocket : public SimpleSocket
 {

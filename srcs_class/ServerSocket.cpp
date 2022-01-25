@@ -16,16 +16,20 @@ void    ServerSocket::init()
 	}
 }
 
-HttpRequest handle_client_request(std::vector<std::string> client_request)
+/* 
+**	Read the HTTPrequest one line at a time and store them in a map.
+*/
+void	parse_http_request(int client_sock)
 {
-	HttpRequest request(client_request);
-	return (request);
+	int		ret = 0;
+	char	buffer[REQUEST_READ_BUFFER] = {0};
+
+	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
+	if (ret < 0)
+		std::cerr << "error: Couldn't read from client socket" << std::endl;
+
+	HttpRequest client_request(buffer);
 }
-
-// std::string response_to_client(std::string	)
-// {
-
-// }
 
 int ServerSocket::run()
 {
@@ -56,38 +60,13 @@ int ServerSocket::run()
 				std::cerr << "error: Socket accept" << std::endl;
 				return (-1);
 			}
-			
 
-			// read_from_socket(client_sock);
-			
-			/* 
-			**	Instead of processing HTTPrequest one line at a time, create huge string from the retunred lines,
-			**	and process later. (TODO: check if need to adjust this function) 
-			*/
-			int		ret = 0;
-			std::vector<std::string> client_request;
-			char 	*tmp_line = NULL;
-			while (((ret = get_next_line(client_sock, &tmp_line)) >= 0) && ft_strlen(tmp_line) > 0)
-			{
-				// store the line
-				std::string line(tmp_line);
-				client_request.push_back(line);
+			// HttpRequest client_request;
+			try {
+				parse_http_request(client_sock);
+			} catch (...) { }
 
-				free(tmp_line);
-				tmp_line = NULL;
-
-				// check if end of HTTP request via \r\n??????
-
-				if (ret == 0)
-					break;
-			}
-			if (ret < 0)
-			{
-				std::cerr << "error: Couldn't read from client socket" << std::endl;
-				return (-1);
-			}
-        	std::cout << "Request from client accepted" << std::endl;
-			handle_client_request(client_request);
+			// handle_client_request(client_request);
 
 			// std::string	response = response_to_client(client_request);
 
