@@ -69,7 +69,7 @@ int ServerSocket::run()
 
 			HttpRequest client_http_request;
 			try {
-				client_http_request = parse_http_request(client_sock);
+				parse_http_request(client_sock);
 			} catch (...) { }
 
 			// std::string	response = response_to_client(client_http_request);

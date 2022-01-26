@@ -15,7 +15,7 @@ class HttpRequest
 
 		HttpRequest();
 		HttpRequest(char *buffer);
-		~HttpRequest();
+		// ~HttpRequest();
 		
 		HttpRequest (const HttpRequest &copy) 
 		{ 
