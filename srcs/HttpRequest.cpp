@@ -5,23 +5,36 @@ HttpRequest::HttpRequest()
 	std::cout << "--HttpRequest constructor called--" << std::endl;
 }
 
+/*
+**	parse 1 line at a time and store the content to the class.
+*/
 HttpRequest::HttpRequest(char *buffer)
 {
 	std::string			line;
 	std::stringstream	tmp_string_stream(buffer);
 	bool 				first_line = true;
+	bool				reading_headers = true;
 
-	while (std::getline(tmp_string_stream, line, '\n'))
+	while (std::getline(tmp_string_stream, line, '\n') && reading_headers == true)
 	{
-		if (first_line)
+		if (reading_headers)
 		{
-			this->parse_startline(line);
-			first_line = false;
+			if (first_line)
+			{
+				this->parse_startline(line);
+				first_line = false;
+			}
+			else
+			{
+				this->parse_header_line(line);
+			}
+			if (line.size() == 0)
+				reading_headers = false;
 		}
-		else
-		{
-			this->parse_header_line(line);
-		}
+	}
+	while (std::getline(tmp_string_stream, line, '\0'))
+	{
+		this->_body.append(line);
 	}
 	std::cout << "==========================================\n";
 	this->print();
@@ -33,6 +46,7 @@ void	HttpRequest::print() const
 	std::cout << "method: " << this->get_method() << "\nurl: " << this->get_url() << "\nversion: " << this->get_version() << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
     	std::cout << it->first << " => " << it->second << '\n';
+	std::cout << "BODY: \n[" << this->_body << "]\n";
 }
 
 void	HttpRequest::parse_startline(std::string line)

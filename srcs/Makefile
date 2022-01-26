@@ -1,6 +1,14 @@
-NAME		=	webserv.out
+SERVER_NAME		=	server.out
+CLIENT_NAME		=	client.out
 
-SRCS		=	server_main.cpp	\
+SRCS_SERVER		=	main_server.cpp	\
+					SimpleSocket.cpp ServerSocket.cpp \
+					HttpRequest.cpp \
+					utils.cpp \
+
+SRCS_CLIENT		=	main_client.cpp	\
+					SimpleSocket.cpp ClientSocket.cpp \
+					utils.cpp \
 
 CPP			=	clang++
 
@@ -9,21 +17,26 @@ CPPFLAGS		+=	-Wall -Wextra -Wextra -std=c++98
 %.o: %.cpp
 				$(CPP) $(CPPFLAGS) -c $<
 
-OBJS		=	$(SRCS:.cpp=.o)
+OBJS_SERVER		=	$(SRCS_SERVER:.cpp=.o)
+OBJS_CLIENT		=	$(SRCS_CLIENT:.cpp=.o)
 
+# defaults to server compilation
+all				:	server  client
+server			: 	$(SERVER_NAME)
+$(SERVER_NAME)	:	$(OBJS_SERVER)
+				$(CPP) -o $(SERVER_NAME) $(CPPFLAGS) $(OBJS_SERVER)
 
-all			:	$(NAME)
+client			:	$(CLIENT_NAME)
+$(CLIENT_NAME)	:	$(OBJS_CLIENT)
+				$(CPP) -o $(CLIENT_NAME) $(CPPFLAGS) $(OBJS_CLIENT)
 
-$(NAME)		:	$(OBJS)
-				$(CPP) -o $(NAME) $(CPPFLAGS) $(OBJS)
+san				:	$(OBJS_SERVER)
+					$(CPP) -o $(SERVER_NAME) -fsanitize=address $(CPPFLAGS) $(OBJS_SERVER)
 
-san			:	$(OBJS)
-				$(CPP) -o $(NAME) -fsanitize=address $(CPPFLAGS) $(OBJS)
+clean			:
+					rm -rf $(OBJS_SERVER) $(OBJS_CLIENT)
 
-clean		:
-				rm -rf $(OBJS)
+fclean			:	clean
+					rm -f $(SERVER_NAME) $(CLIENT_NAME)
 
-fclean		:	clean
-				rm -f $(NAME)
-
-re			:	fclean all
+re				:	fclean all
