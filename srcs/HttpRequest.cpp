@@ -28,14 +28,16 @@ HttpRequest::HttpRequest(char *buffer)
 			{
 				this->parse_header_line(line);
 			}
-			if (line.size() == 0)
+			if (line.size() == 0)	// check the header-body delimeter (empty line)
 				reading_headers = false;
 		}
 	}
+	// read body
 	while (std::getline(tmp_string_stream, line, '\0'))
 	{
 		this->_body.append(line);
 	}
+	
 	std::cout << "==========================================\n";
 	this->print();
 	std::cout << "==========================================\n";

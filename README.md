@@ -20,11 +20,21 @@ About Multiplexing: [Select vs Poll](https://devarea.com/linux-io-multiplexing-s
 
 ## Getting on the HTTP Response:
 - Find out how there are defined: https://www.rfc-editor.org/rfc/rfc2616#section-4.1
+- Http Request: https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages#http_requests
+- Status code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 
-## Server Side
+## TODOs: Server Side
 - [x] create a server-like program that listen for HTML request.
 - [ ] make the server setup ports and maybe other things like servername FROM a config file (like nginx) 
-- [ ] Define a HttpRequest(HttpMessage) class and create it when reading client request/prepare response to the client.
+- [x] Define a HttpRequest(HttpMessage) class and create it when reading client request/prepare response to the client.
+- [ ] Make a HttpResponse class which takes the request as input and build response.
+- [ ] Be able to output a html file on browser via typing `localhost::PORT/URL`
 
-## Client Side
+## TODOs: Client Side/Tester
 - [x] Simple socket that sends request to the server
+
+
+# Notes
+### Status Code
+- `GET`: indicates that a resource should be fetched.
+- `POST`: data is pushed to the server (creating or modifying a resource, or generating a temporary document to send back).

@@ -3,7 +3,8 @@
 
 # include "SimpleSocket.hpp"
 
-class HttpRequest;
+// class HttpRequest;
+// class HttpResponse;
 
 # include <string>
 # include <sstream>
@@ -15,6 +16,8 @@ class HttpRequest;
 
 # include "utils.hpp"
 # include "HttpRequest.hpp"
+# include "HttpResponse.hpp"
+# include "MyException.hpp"
 
 # define REQUEST_READ_BUFFER  10256
 
