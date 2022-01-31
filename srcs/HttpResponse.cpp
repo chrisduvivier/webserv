@@ -24,15 +24,15 @@ HttpResponse::HttpResponse(HttpRequest request) :
 			std::cout << "path = " << path << std::endl;
 
 			// try to find the path, and if exists, open it.
-			std::ifstream paramFile(path.c_str());
+			std::ifstream paramFile(path.c_str());	//only accepts const * char so need to convert
 			if (paramFile)
 			{
 				std::stringstream buffer;
-				buffer << paramFile.rdbuf();
-				std::string body = buffer.str();
+				buffer << paramFile.rdbuf();		// from filestream to strstream 
+				std::string body = buffer.str();	// convert stream to string
 				std::cout << "body = " << body << std::endl;
 
-				this->_status_code = 200;
+				this->_status_code = 200;			// This part will handle the status code, text, and body 
 				this->_status_text = "OK";
 				this->_body = body;
 			}
