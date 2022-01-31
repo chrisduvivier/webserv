@@ -47,7 +47,7 @@ void	HttpRequest::print() const
 {
 	std::cout << "method: " << this->get_method() << "\nurl: " << this->get_url() << "\nversion: " << this->get_version() << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
-    	std::cout << it->first << " => " << it->second << '\n';
+    	std::cout << it->first << ": " << it->second << '\n';
 	std::cout << "BODY: \n[" << this->_body << "]\n";
 }
 

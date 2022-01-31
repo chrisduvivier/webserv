@@ -4,6 +4,7 @@ CLIENT_NAME		=	client.out
 SRCS_SERVER		=	main_server.cpp	\
 					SimpleSocket.cpp ServerSocket.cpp \
 					HttpRequest.cpp \
+					HttpResponse.cpp \
 					utils.cpp \
 
 SRCS_CLIENT		=	main_client.cpp	\

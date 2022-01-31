@@ -68,20 +68,22 @@ int ServerSocket::run()
 
 			HttpRequest client_http_request;
 			try {
-				parse_http_request(client_sock);
+				client_http_request = parse_http_request(client_sock);
 			} catch (std::exception& e) {
 				std::cout << e.what() << std::endl;
 				close(client_sock);
 				continue ;				//close current socket and restart listening 
 			}
-
+			
 			try {
 				HttpResponse http_reponse(client_http_request);
+				response = http_reponse.construct_response();
 			} catch (std::exception &e) {
 				std::cout << e.what() << std::endl;
 				close(client_sock);
 				continue ;
 			}
+
 
 			// "send" with a zero flags argument is equivalent to write(2).
 			if (send(client_sock, response.c_str(), strlen(response.c_str()) , 0) == -1)
