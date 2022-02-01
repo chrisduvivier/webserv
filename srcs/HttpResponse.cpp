@@ -35,6 +35,9 @@ HttpResponse::HttpResponse(HttpRequest request) :
 				this->_status_code = 200;			// This part will handle the status code, text, and body 
 				this->_status_text = "OK";
 				this->_body = body;
+
+				// explicitly add length for now
+				this->_headers["Content-Length"] = body.length();
 			}
 			else
 			{
@@ -65,7 +68,16 @@ std::string	HttpResponse::construct_response()
 	std::stringstream tmp;
 	std::string response;
 
-	tmp << this->_protocol << " " << this->_status_code << " " << this->_status_text << "\r\n\r\n" << this->_body;
+	// first line
+	tmp << this->_protocol << " " << this->_status_code << " " << this->_status_text << "\r\n";
+
+	// add Headers
+	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
+    	tmp << it->first << ": " << it->second << "\r\n";
+	
+	// add delimiter between headers and body. 
+	tmp << "\r\n\r\n" << this->_body;
+
 	response = tmp.str();
 	return (response);
 }

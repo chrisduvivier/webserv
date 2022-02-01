@@ -38,9 +38,9 @@ HttpRequest::HttpRequest(char *buffer)
 		this->_body.append(line);
 	}
 	
-	std::cout << "==========================================\n";
+	std::cout << "===============PRINTING===================\n";
 	this->print();
-	std::cout << "==========================================\n";
+	std::cout << "=================DONE=====================\n";
 }
 
 void	HttpRequest::print() const
