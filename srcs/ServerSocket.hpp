@@ -6,12 +6,17 @@
 // class HttpRequest;
 // class HttpResponse;
 
+/* According to POSIX.1-2001 */
+#include <sys/select.h>
+
+/* According to earlier standards */
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 # include <string>
 # include <sstream>
 # include <fcntl.h>
-# include <sys/select.h>
-# include <sys/time.h>
-
 # include <vector>
 
 # include "utils.hpp"

@@ -1,14 +1,12 @@
 # webserv
 42 webserv project
 
-## Flow of the program
-TODO
-
 ## Starting point (Prep + Resources)
 Read fantastic [guide](https://www.notion.so/Documentation-Webserv-320727979ffd4176a7dd5ba41aaadf46) made by former 42 students (written in French). Some take away from this guide:
 - [How to build a web client](https://www.youtube.com/watch?v=bdIiTxtMaKA&list=PL9IEJIKnBJjH_zM5LnovnoaKlXML5qh17&index=2) (Our `tcpclient.c` in the POC/mini_client folder is based on this video)
 - [How to build a web server]: see POC in the documentation
 - [How to use select for having a non-blocking i/o server]: see POC in the documentation
+- [Motivation for using "multiplexing"](https://devarea.com/linux-io-multiplexing-select-vs-poll-vs-epoll/#.Yfm19epKiHs)
 
 One of the most detailed example program for non-blocking select: [example of IBM here](https://www.ibm.com/docs/en/i/7.2?topic=designs-example-nonblocking-io-select)
 
