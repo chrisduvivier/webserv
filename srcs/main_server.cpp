@@ -1,6 +1,6 @@
 # include "ServerSocket.hpp"
 
-# define PORT 14000
+# define PORT 8080
 
 int main(int argc, char *argv[])
 {

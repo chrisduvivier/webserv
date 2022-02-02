@@ -57,12 +57,4 @@ class HttpRequest
 		std::string										_body;
 };
 
-
-// NOT WORKINg
-// std::ostream& operator<<(std::ostream& os, const HttpRequest& obj)
-// {
-// 	os << "method: " << obj.get_method() << "\nurl: " << obj.get_url() << "\nversion: " << obj.get_version() << std::endl;
-// 	return (os);
-// }
-
 #endif

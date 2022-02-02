@@ -2,16 +2,14 @@
 
 HttpResponse::HttpResponse() : 
 	_protocol("HTTP/1.1")
-{
-	std::cout << "-- HttpResponse constructor called --" << std::endl;
-}
+{}
 
 HttpResponse::HttpResponse(HttpRequest request) : 
 	_protocol("HTTP/1.1")
 {
 	std::string directory = "./html";
 
-	std::cout << "method= " << request.get_method() << std::endl;
+	// std::cout << "method= " << request.get_method() << std::endl;
 
 	// assume at this point that the request is cleaned and error-free
 	if (request.get_method() == "GET")
@@ -21,7 +19,7 @@ HttpResponse::HttpResponse(HttpRequest request) :
 		{
 			std::string path = directory + request.get_url();
 
-			std::cout << "path = " << path << std::endl;
+			// std::cout << "path = " << path << std::endl;
 
 			// try to find the path, and if exists, open it.
 			std::ifstream paramFile(path.c_str());	//only accepts const * char so need to convert
@@ -30,7 +28,7 @@ HttpResponse::HttpResponse(HttpRequest request) :
 				std::stringstream buffer;
 				buffer << paramFile.rdbuf();		// from filestream to strstream 
 				std::string body = buffer.str();	// convert stream to string
-				std::cout << "body = " << body << std::endl;
+				// std::cout << "body = " << body << std::endl;
 
 				this->_status_code = 200;			// This part will handle the status code, text, and body 
 				this->_status_text = "OK";
