@@ -2,7 +2,7 @@
 
 HttpRequest::HttpRequest()
 {
-	std::cout << "--HttpRequest constructor called--" << std::endl;
+	// std::cout << "--HttpRequest constructor called--" << std::endl;
 }
 
 /*
@@ -38,9 +38,9 @@ HttpRequest::HttpRequest(char *buffer)
 		this->_body.append(line);
 	}
 	
-	std::cout << "===============PRINTING===================\n";
-	this->print();
-	std::cout << "=================DONE=====================\n";
+	// std::cout << "===============PRINTING===================\n";
+	// this->print();
+	// std::cout << "=================DONE=====================\n";
 }
 
 void	HttpRequest::print() const

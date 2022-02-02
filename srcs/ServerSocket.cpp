@@ -37,8 +37,6 @@ int	handle_connection(int client_sock)
 {
 	std::string	response = "HTTP/1.1 200 OK\r\n\r\n Congratulation !";
 
-	std::cout << "handling connection !"<< std::endl;
-
 	HttpRequest client_http_request;
 	try {
 		client_http_request = parse_http_request(client_sock);
@@ -87,7 +85,7 @@ int ServerSocket::run()
 		struct timeval	timeout;	//for timeout
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
-		if (select(FD_SETSIZE + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
+		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, &timeout) < 0)
 		{
 			std::cout << "error: select error" << std::endl;
 			return (-1);
@@ -117,7 +115,6 @@ int ServerSocket::run()
 				}
 			}
 		}
-		FD_CLR(_sock, &current_sockets);
 		std::cout << "\n+++++++ Waiting for new connection ++++++++\n";
 	}
 	return (0);	//should never quit
