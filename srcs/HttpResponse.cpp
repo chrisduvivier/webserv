@@ -7,58 +7,8 @@ HttpResponse::HttpResponse() :
 HttpResponse::HttpResponse(HttpRequest request) : 
 	_protocol("HTTP/1.1")
 {
-	std::string directory = "./html";
-
-	// std::cout << "method= " << request.get_method() << std::endl;
-
-	// assume at this point that the request is cleaned and error-free
-	if (request.get_method() == "GET")
-	{
-		// get the path requested
-		if (!request.get_url().empty())
-		{
-			std::string path = directory + request.get_url();
-
-			// std::cout << "path = " << path << std::endl;
-
-			// try to find the path, and if exists, open it.
-			std::ifstream paramFile(path.c_str());	//only accepts const * char so need to convert
-			if (paramFile)
-			{
-				std::stringstream buffer;
-				buffer << paramFile.rdbuf();		// from filestream to strstream 
-				std::string body = buffer.str();	// convert stream to string
-				// std::cout << "body = " << body << std::endl;
-
-				this->_status_code = 200;			// This part will handle the status code, text, and body 
-				this->_status_text = "OK";
-				this->_body = body;
-
-				// explicitly add length for now
-				this->_headers["Content-Length"] = body.length();
-			}
-			else
-			{
-     			std::string error;
-				std::stringstream tmp;
-				tmp << "Error code: " << strerror(errno) << "File could not be opened!\n";
-				error = tmp.str();
-				throw MyException(error);
-			}
-		}
-	}
-	else if (request.get_method() == "POST")
-	{
-		throw MyException("Exception: Not currently supported\n");
-	}
-	else if (request.get_method() == "DELETE")
-	{
-		throw MyException("Exception: Not currently supported\n");
-	}
-	else
-	{
-		throw MyException("Exception: Unknown Method detected from request\n");
-	}
+	// rely on build_response for now. might merge that funtion to here in the future.
+	(void) request;
 }
 
 std::string	HttpResponse::construct_response()
@@ -78,4 +28,61 @@ std::string	HttpResponse::construct_response()
 
 	response = tmp.str();
 	return (response);
+}
+
+void	HttpResponse::build_response(HttpRequest request)
+{
+	if (request.get_method() == "GET")
+	{
+		this->handle_get_request(request);
+	}
+	else if (request.get_method() == "POST")
+	{
+		throw MyException("Exception: Not currently supported\n");
+	}
+	else if (request.get_method() == "DELETE")
+	{
+		throw MyException("Exception: Not currently supported\n");
+	}
+	else
+	{
+		throw MyException("Exception: Unknown Method detected from request\n");
+	}
+}
+
+void	HttpResponse::handle_get_request(HttpRequest request)
+{
+	std::string directory = "./html";
+	// get the path requested
+	if (!request.get_url().empty())
+	{
+		std::string path = directory + request.get_url();
+
+		// std::cout << "path = " << path << std::endl;
+
+		// try to find the path, and if exists, open it.
+		std::ifstream paramFile(path.c_str());	//only accepts const * char so need to convert
+		if (paramFile)
+		{
+			std::stringstream buffer;
+			buffer << paramFile.rdbuf();		// from filestream to strstream 
+			std::string body = buffer.str();	// convert stream to string
+			// std::cout << "body = " << body << std::endl;
+
+			this->_status_code = 200;			// This part will handle the status code, text, and body 
+			this->_status_text = "OK";
+			this->_body = body;
+
+			// explicitly add length for now
+			this->_headers["Content-Length"] = body.length();
+		}
+		else
+		{
+			std::string error; //create error string using string stream
+			std::stringstream tmp;
+			tmp << "Error code: " << strerror(errno) << "File could not be opened!\n";
+			error = tmp.str();
+			throw MyException(error);
+		}
+	}
 }

@@ -31,7 +31,10 @@ int	handle_connection(int client_sock)
 		throw MyException("Exception: Couldn't read from client socket");
 
 	HttpRequest client_http_request(buffer);
-	HttpResponse http_reponse(client_http_request);
+	
+	HttpResponse http_reponse;
+	http_reponse.build_response(client_http_request);
+	
 	response = http_reponse.construct_response();
 	
 	// "send" with a zero flags argument is equivalent to write(2).
