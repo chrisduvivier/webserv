@@ -50,41 +50,86 @@ void	HttpResponse::build_response(HttpRequest request)
 	}
 }
 
+std::map<std::string, std::string> ContentTypeList(){
+	std::map<std::string, std::string> contentType;
+	contentType["html"] = "text/html; charset=utf-8";
+	contentType["txt"] = "text/plain; charset=utf-8";
+	contentType["jpeg"] = "image/jpeg";
+	contentType["png"] = "image/png";
+	contentType["gif"] = "image/gif";
+	contentType["bmp"] = "image/bmp";
+	contentType["webp"] = "image/webp";
+	contentType["ico"] = "image/vnd.microsoft.icon";
+	return (contentType);
+}
+
 void	HttpResponse::handle_get_request(HttpRequest request)
 {
+	// std::string directory = "./html";
+	// // get the path requested
+	// if (!request.get_url().empty())
+	// {
+	// 	std::string path = directory + request.get_url();
+
+	// 	// std::cout << "path = " << path << std::endl;
+
+	// 	// try to find the path, and if exists, open it.
+	// 	std::ifstream paramFile(path.c_str());	//only accepts const * char so need to convert
+	// 	if (paramFile)
+	// 	{
+	// 		std::stringstream buffer;
+	// 		buffer << paramFile.rdbuf();		// from filestream to strstream 
+	// 		std::string body = buffer.str();	// convert stream to string
+	// 		// std::cout << "body = " << body << std::endl;
+
+	// 		this->_status_code = 200;			// This part will handle the status code, text, and body 
+	// 		this->_status_text = "OK";
+	// 		this->_body = body;
+
+	// 		// explicitly add length for now
+	// 		this->_headers["Content-Length"] = body.length();
+	// 	}
+	// 	else
+	// 	{
+	// 		std::string error; //create error string using string stream
+	// 		std::stringstream tmp;
+	// 		tmp << "Error code: " << strerror(errno) << "File could not be opened!\n";
+	// 		error = tmp.str();
+	// 		throw MyException(error);
+	// 	}
+	// }
+
+	/* probably going to be a server attribute */
 	std::string directory = "./html";
-	// get the path requested
+
 	if (!request.get_url().empty())
 	{
+		/* we build the path to the ressource requested */
 		std::string path = directory + request.get_url();
 
-		// std::cout << "path = " << path << std::endl;
-
-		// try to find the path, and if exists, open it.
-		std::ifstream paramFile(path.c_str());	//only accepts const * char so need to convert
-		if (paramFile)
+		/* we check if the ressource exists - Error 404 if it does not */
+		std::ifstream ressource(path.c_str());
+		if (!ressource)
 		{
-			std::stringstream buffer;
-			buffer << paramFile.rdbuf();		// from filestream to strstream 
-			std::string body = buffer.str();	// convert stream to string
-			// std::cout << "body = " << body << std::endl;
-
-			this->_status_code = 200;			// This part will handle the status code, text, and body 
-			this->_status_text = "OK";
-			this->_body = body;
-
-			// explicitly add length for now
-			this->_headers["Content-Length"] = body.length();
+			this->_protocol = "HTTP/1.1";
+			this->_status_code = 404;
+			this->_status_text = "Not Found";
+			this->_headers["Content-Type"] = "text/html; charset=utf-8";
+			this->_body = "<!DOCTYPE html>\n<html>\n<title>404 Not Found</title>\n<body>\n<div>\n<H1>404 Not Found</H1>\n<p>Unable to find a representation of the requested resource</p>\n</div>\n</body>\n</html>";
+			this->_headers["Content-Length"] = std::to_string(this->_body.length());
+			return ;
 		}
-		else
-		{
-			std::string error; //create error string using string stream
-			std::stringstream tmp;
-			tmp << "Error code: " << strerror(errno) << "File could not be opened!\n";
-			error = tmp.str();
-			throw MyException(error);
-		}
+		this->_protocol = "HTTP/1.1";
+		this->_status_code = 200;
+		this->_status_text = "OK";
+		this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.') + 1)];
+		std::stringstream buff;
+		buff << ressource.rdbuf();
+		ressource.close();
+		this->_body = buff.str();
+		this->_headers["Content-Length"] = std::to_string(this->_body.length());
 	}
+
 }
 
 void	HttpResponse::handle_post_request(HttpRequest request)
