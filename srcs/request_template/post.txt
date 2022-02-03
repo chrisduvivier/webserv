@@ -1,0 +1,13 @@
+POST /echo/post/json HTTP/1.1
+Authorization: Bearer mt0dgHmLJMVQhvjpNXDyA83vA_Pxh33Y
+Accept: application/json
+Content-Type: application/json
+Content-Length: 85
+Host: reqbin.com
+
+{
+   "Id": 12345,
+   "Customer": "John Smith",
+   "Quantity": 1,
+   "Price": 10.00
+}

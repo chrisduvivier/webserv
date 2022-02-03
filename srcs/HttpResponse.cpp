@@ -38,7 +38,7 @@ void	HttpResponse::build_response(HttpRequest request)
 	}
 	else if (request.get_method() == "POST")
 	{
-		throw MyException("Exception: Not currently supported\n");
+		this->handle_get_request(request);
 	}
 	else if (request.get_method() == "DELETE")
 	{
@@ -85,4 +85,9 @@ void	HttpResponse::handle_get_request(HttpRequest request)
 			throw MyException(error);
 		}
 	}
+}
+
+void	HttpResponse::handle_post_request(HttpRequest request)
+{
+	
 }

@@ -33,6 +33,8 @@ About Multiplexing: [Select vs Poll](https://devarea.com/linux-io-multiplexing-s
 
 
 # Notes
+[Transfer-encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding)
+
 ### Status Code
 - `GET`: indicates that a resource should be fetched.
 - `POST`: data is pushed to the server (creating or modifying a resource, or generating a temporary document to send back).
