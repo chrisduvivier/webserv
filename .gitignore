@@ -37,3 +37,6 @@
 # POC
 *.mini_server
 *.mini_client
+
+# .DS_Store
+.DS_Store
