@@ -24,7 +24,7 @@ std::string	HttpResponse::construct_response()
     	tmp << it->first << ": " << it->second << "\r\n";
 	
 	// add delimiter between headers and body. 
-	tmp << "\r\n\r\n" << this->_body;
+	tmp << "\r\n" << this->_body;
 
 	response = tmp.str();
 	return (response);
@@ -60,6 +60,10 @@ std::map<std::string, std::string> ContentTypeList(){
 	contentType["bmp"] = "image/bmp";
 	contentType["webp"] = "image/webp";
 	contentType["ico"] = "image/vnd.microsoft.icon";
+
+	// for(std::map<std::string, std::string>::const_iterator it = contentType.begin(); it != contentType.end(); it++)
+	// 	std::cout << it->first << ": " << it->second << std::endl;
+
 	return (contentType);
 }
 
@@ -119,20 +123,34 @@ void	HttpResponse::handle_get_request(HttpRequest request)
 			this->_headers["Content-Length"] = std::to_string(this->_body.length());
 			return ;
 		}
+
 		this->_protocol = "HTTP/1.1";
 		this->_status_code = 200;
 		this->_status_text = "OK";
-		this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.') + 1)];
+		this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
+
 		std::stringstream buff;
 		buff << ressource.rdbuf();
 		ressource.close();
 		this->_body = buff.str();
 		this->_headers["Content-Length"] = std::to_string(this->_body.length());
+
+		std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
+		this->print();
 	}
 
 }
 
+void	HttpResponse::print(){
+
+	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
+	for(std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
+		std::cout << it->first << ": " << it->second << std::endl;
+	std::cout << std::endl;
+	std::cout << this->_body << std::endl;
+}
+
 void	HttpResponse::handle_post_request(HttpRequest request)
 {
-	
+	(void)request;
 }

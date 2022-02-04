@@ -46,6 +46,7 @@ class HttpResponse
 		void		build_response(HttpRequest request);
 		void		handle_get_request(HttpRequest request);
 		void		handle_post_request(HttpRequest request);
+		void		print();
 
 	private:
 		std::string							_protocol;
