@@ -119,7 +119,15 @@ void	HttpResponse::print(){
 
 void	HttpResponse::handle_post_request(HttpRequest request)
 {
-	(void)request;
+	std::cout << "HANDLING POST REQUEST" << std::endl;
+	
+	(void) request;
+	/* probably going to be a server attribute */
+	std::string directory = "./public_html";
+	
+
+
+
 }
 
 void	HttpResponse::handle_delete_request(HttpRequest request){
@@ -149,7 +157,7 @@ void	HttpResponse::handle_delete_request(HttpRequest request){
 		ressource.close();
 		this->_protocol = "HTTP/1.1";
 
-		if (remove(path.c_str()) == 0)
+		if (std::remove(path.c_str()) == 0)
 		{
 			this->_status_code = 204;
 			this->_status_text = "No Content";

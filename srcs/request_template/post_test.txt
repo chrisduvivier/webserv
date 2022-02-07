@@ -1,0 +1,8 @@
+POST /cgi-bin/ubuntu-php-cgi HTTP/1.0
+Accept: www/source
+Accept: text/html
+Accept: text/plain
+User-Agent: Lynx/2.4 libwww/2.14
+Content-type: application/x-www-form-urlencoded
+Content-length: 35
+user=Larry%20Bird&age=35&pass=testing

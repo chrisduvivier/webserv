@@ -16,7 +16,9 @@ int	ClientSocket::init()
 
 int ClientSocket::run()
 {
-	std::string message_to_server = "GET /test.html HTTP/1.1\nHost: localhost:8080\n\nHello!\r\n";
+	// std::string message_to_server = "GET /test.html HTTP/1.1\nHost: localhost:8080\n\nHello!\r\n";
+	std::string message_to_server = "POST /cgi-bin/program.pl HTTP/1.0\nAccept: www/source\nAccept: text/html\nAccept: text/plain\
+    \nUser-Agent: Lynx/2.4 libwww/2.14\nContent-type: application/x-www-form-urlencoded\nContent-length: 35\n\nuser=Larry%20Bird&age=35&pass=testing";
 
 	char buffer[BUFFER_SIZE] = "";
 	long valread;
