@@ -67,7 +67,7 @@ std::map<std::string, std::string> ContentTypeList(){
 void	HttpResponse::handle_get_request(HttpRequest request)
 {
 	/* probably going to be a server attribute */
-	std::string directory = "./html";
+	std::string directory = "./public_html";
 
 	if (!request.get_url().empty())
 	{
@@ -125,7 +125,7 @@ void	HttpResponse::handle_post_request(HttpRequest request)
 void	HttpResponse::handle_delete_request(HttpRequest request){
 
 	/* probably going to be a server attribute */
-	std::string directory = "./html";
+	std::string directory = "./public_html";
 
 	if (!request.get_url().empty())
 	{
