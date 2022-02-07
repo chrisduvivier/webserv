@@ -36,13 +36,23 @@ int	handle_connection(int client_sock)
 	http_reponse.build_response(client_http_request);
 	
 	response = http_reponse.construct_response();
-	
+
 	// "send" with a zero flags argument is equivalent to write(2).
-	if (send(client_sock, response.c_str(), strlen(response.c_str()) , 0) == -1)
+	// send doesn't always send all the bytes requested, it has to be used in a loop to ensure that all the data is correctly sent.
+
+	size_t 		response_size = response.length();
+	int			bytes_sent;
+	const char 	*bytes_to_send = static_cast<const char *>(response.c_str());
+
+	while (response_size > 0)
 	{
-		std::cerr << "error: Response to client" << std::endl;
-		return (-1);
+		bytes_sent = send(client_sock, bytes_to_send, response_size, 0);
+		if (bytes_sent < 0)
+			return (-1);
+		bytes_to_send += bytes_sent;
+		response_size -= bytes_sent;
 	}
+
 	return (0);
 }
 
