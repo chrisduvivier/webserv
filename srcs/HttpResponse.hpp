@@ -13,6 +13,7 @@
 # include "HttpRequest.hpp"
 # include "MyException.hpp"
 
+
 class HttpResponse
 {
 	public:
@@ -46,6 +47,7 @@ class HttpResponse
 		void		build_response(HttpRequest request);
 		void		handle_get_request(HttpRequest request);
 		void		handle_post_request(HttpRequest request);
+		void		handle_delete_request(HttpRequest request);
 		void		print();
 
 	private:
