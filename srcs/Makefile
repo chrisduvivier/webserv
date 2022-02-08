@@ -6,6 +6,7 @@ SRCS_SERVER		=	main_server.cpp	\
 					HttpRequest.cpp \
 					HttpResponse.cpp \
 					utils.cpp \
+					ServerConfig.cpp\
 
 SRCS_CLIENT		=	main_client.cpp	\
 					SimpleSocket.cpp ClientSocket.cpp \
