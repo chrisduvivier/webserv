@@ -17,7 +17,11 @@ int main(int argc, char *argv[])
 	std::map<int, std::string>::iterator	it1;
 	std::map<int, std::string>				error_page = server_info[0].get_error_pages();
 	it1 = error_page.begin();
-	std::cout << "error_nb = "<< it1->first << " and path = " << it1->second << std::endl;*/
+	std::cout << "error_nb = "<< it1->first << " and path = " << it1->second << std::endl;
+	std::map<std::string, std::string>::iterator	it2;
+	std::map<std::string, std::string>				location = server_info[0].get_location();
+	it2 = location.begin();
+	std::cout << "location = "<< it2->first << "\nblock = \n" << it2->second << std::endl;*/
 
     // create a server socket instance and run it
     ServerSocket Server(PORT, INADDR_ANY, AF_INET, SOCK_STREAM, 0);

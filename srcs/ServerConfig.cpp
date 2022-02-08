@@ -6,7 +6,7 @@
 /*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 12:18:06 by ldavids           #+#    #+#             */
-/*   Updated: 2022/02/08 13:58:00 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/02/08 15:19:20 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ ServerConfig::ServerConfig()
 	_client_max_body_size = 1; // 1 mb is default on nginx
 	_error_pages.insert(std::make_pair(404, "/usr/share/nginx/html/custom_404.html"));
 	_error_pages.insert(std::make_pair(500, "/usr/share/nginx/html/custom_500.html"));
+	_location.insert(std::make_pair("/", "root /var/www/html \n method GET POST \n "));
+	_location.insert(std::make_pair("/favicon.ico", "method GET"));
 }
 
 ServerConfig::~ServerConfig()
@@ -68,4 +70,9 @@ int				ServerConfig::get_client_max_body_size()
 std::map<int, std::string>		ServerConfig::get_error_pages()
 {
 	return (_error_pages);
+}
+
+std::map<std::string, std::string>		ServerConfig::get_location()
+{
+	return (_location);
 }
