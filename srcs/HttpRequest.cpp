@@ -79,6 +79,7 @@ void	HttpRequest::parse_header_line(std::string line)
     if (line.size() == 0) return;
 
     int pos_split = line.find(":", 0); //Look for separator ':'
+	if (pos_split == -1) return ;
 
     key = line.substr(0, pos_split);
     value = line.substr(pos_split + 1);

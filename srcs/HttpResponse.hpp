@@ -13,6 +13,7 @@
 # include "HttpRequest.hpp"
 # include "MyException.hpp"
 
+# include "Cgi.hpp"
 
 class HttpResponse
 {
@@ -21,7 +22,7 @@ class HttpResponse
 		HttpResponse();
 		HttpResponse(HttpRequest request);
 		// ~HttpResponse();
-		
+
 		HttpResponse (const HttpResponse &copy) 
 		{
 			this->_protocol = copy._protocol;

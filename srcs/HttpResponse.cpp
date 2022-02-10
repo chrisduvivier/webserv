@@ -71,12 +71,12 @@ void	HttpResponse::handle_get_request(HttpRequest request)
 
 	if (!request.get_url().empty())
 	{
-		/* we build the path to the ressource requested */
+		/* we build the path to the resource requested */
 		std::string path = directory + request.get_url();
 
-		/* we check if the ressource exists - Error 404 if it does not */
-		std::ifstream ressource(path.c_str());
-		if (!ressource)
+		/* we check if the resource exists - Error 404 if it does not */
+		std::ifstream resource(path.c_str());
+		if (!resource)
 		{
 			this->_protocol = "HTTP/1.1";
 			this->_status_code = 404;
@@ -85,7 +85,7 @@ void	HttpResponse::handle_get_request(HttpRequest request)
 			this->_body = "<!DOCTYPE html>\n<html>\n<title>404 Not Found</title>\n<body>\n<div>\n<H1>404 Not Found</H1>\n<p>Unable to find a representation of the requested resource</p>\n</div>\n</body>\n</html>";
 			int body_size = this->_body.length();
 			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-			ressource.close();
+			resource.close();
 			return ;
 		}
 
@@ -95,8 +95,8 @@ void	HttpResponse::handle_get_request(HttpRequest request)
 		this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
 
 		std::stringstream buff;
-		buff << ressource.rdbuf();
-		ressource.close();
+		buff << resource.rdbuf();
+		resource.close();
 		this->_body = buff.str();
 		int body_size = this->_body.length();
 		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
@@ -121,13 +121,34 @@ void	HttpResponse::handle_post_request(HttpRequest request)
 {
 	std::cout << "HANDLING POST REQUEST" << std::endl;
 	
-	(void) request;
 	/* probably going to be a server attribute */
 	std::string directory = "./public_html";
-	
+	if (!request.get_url().empty())
+	{
+		/* we build the path to the resource requested */
+		std::string path = directory + request.get_url();
 
-
-
+		// check if request is a upload or a cgi request
+		int is_cgi_request = true;	// TODO
+		if (is_cgi_request == true)
+		{
+			// 
+			Cgi cgi(request);
+			int ret = cgi.execute_cgi();
+			if (ret < 0)
+				std::cerr << "cgi error \n";
+			this->_protocol = "HTTP/1.1";
+			this->_status_code = 200;
+			this->_status_text = "OK";
+			int body_size = this->_body.length();
+			this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
+			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+		}
+		else
+		{
+			std::cout << "TODO: UPLOAD request\n";
+		}
+	}
 }
 
 void	HttpResponse::handle_delete_request(HttpRequest request){
@@ -137,12 +158,12 @@ void	HttpResponse::handle_delete_request(HttpRequest request){
 
 	if (!request.get_url().empty())
 	{
-		/* we build the path to the ressource requested */
+		/* we build the path to the resource requested */
 		std::string path = directory + request.get_url();
 
-		/* we check if the ressource exists - Error 404 if it does not */
-		std::ifstream ressource(path.c_str());
-		if (!ressource)
+		/* we check if the resource exists - Error 404 if it does not */
+		std::ifstream resource(path.c_str());
+		if (!resource)
 		{
 			this->_protocol = "HTTP/1.1";
 			this->_status_code = 404;
@@ -151,10 +172,10 @@ void	HttpResponse::handle_delete_request(HttpRequest request){
 			this->_body = "<!DOCTYPE html>\n<html>\n<title>404 Not Found</title>\n<body>\n<div>\n<H1>404 Not Found</H1>\n<p>Unable to find a representation of the requested resource</p>\n</div>\n</body>\n</html>";
 			int body_size = this->_body.length();
 			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-			ressource.close();
+			resource.close();
 			return ;
 		}
-		ressource.close();
+		resource.close();
 		this->_protocol = "HTTP/1.1";
 
 		if (std::remove(path.c_str()) == 0)
