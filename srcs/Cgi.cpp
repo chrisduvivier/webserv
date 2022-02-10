@@ -25,7 +25,10 @@ void    Cgi::init_var()
     _SERVER_NAME = "";
     // _REDIRECT_STATUS = "";
     _body = "";
-    _env[0] = NULL;
+    _env[0] = (char *)std::string("Hello this is my 1st env arg").c_str();
+    _env[1] = (char *) std::string("Hello this is my 2nd env arg").c_str();
+    _env[2] = NULL;
+
 }
 
 void    Cgi::set_var(HttpRequest request)
@@ -55,21 +58,31 @@ void    Cgi::set_var(HttpRequest request)
 }
 
 // execute the cgi file using fork
-int     Cgi::execute_cgi()
+int     Cgi::execute_cgi(std::string path_to_cgi)
 { 
     int fd_pipe[2];
     int fdin = dup(STDIN_FILENO);
     int fdout = dup(STDOUT_FILENO);
     char buffer[BUFFER_SIZE + 1];
 
-    pipe(fd_pipe);	
-    if (!fork())
+    pipe(fd_pipe);
+    int cgi_pid = fork();
+    if (cgi_pid == 0) // child process)
     {
         dup2(fd_pipe[0], STDOUT_FILENO);    // [    0     |     1     ]
         dup2(fd_pipe[1], STDIN_FILENO);     // [ read end | write end ]
         close(fd_pipe[0]);
         // execve(_SCRIPT_NAME.c_str(), NULL, _env);
-        execve("cgi-bin/env.cgi", NULL, _env);
+        char *args[3];
+        args[0] = "/usr/bin/perl";
+        args[1] = (char *)path_to_cgi.c_str();
+        args[2] = NULL;
+
+        if (execve("/usr/bin/perl" , args, _env) < 0)
+        {
+            std::cout << "Error: cgi scipt execution error\n";
+            return (-1);      //TODO, just check error of execve
+        }
         exit(0);
     }
     close(fd_pipe[1]);
@@ -77,13 +90,13 @@ int     Cgi::execute_cgi()
 
     int ret = 1;
     std::string returned_body = "";
-
     while (ret > 0) // retrieve output of cgi script
     {
         memset(buffer, 0, BUFFER_SIZE);
         ret = read(fd_pipe[0], buffer, BUFFER_SIZE);
         returned_body += buffer;
     }
+    close(fd_pipe[0]);
     _body = returned_body;
     dup2(fdin, STDIN_FILENO);
     dup2(fdout, STDOUT_FILENO);

@@ -134,7 +134,7 @@ void	HttpResponse::handle_post_request(HttpRequest request)
 		{
 			// 
 			Cgi cgi(request);
-			int ret = cgi.execute_cgi();
+			int ret = cgi.execute_cgi(path);
 			if (ret < 0)
 				std::cerr << "cgi error \n";
 			this->_protocol = "HTTP/1.1";

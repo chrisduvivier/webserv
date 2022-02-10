@@ -8,6 +8,11 @@
 # include "HttpRequest.hpp"
 # include "webserv.hpp"
 
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 1024
+# endif
+
+
 class Cgi
 {
 	public:
@@ -15,7 +20,7 @@ class Cgi
 		Cgi(HttpRequest request);
 		
 		//template for fork and execute the cgi birary
-		int     execute_cgi();
+		int     execute_cgi(std::string path_to_cgi);
 		void    init_var();
 		void    set_var(HttpRequest request);
 

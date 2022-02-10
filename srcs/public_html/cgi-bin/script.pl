@@ -1,4 +1,4 @@
-#!"c:\xampp\perl\bin\perl.exe"
+#!/usr/bin/perl -wT
   
 use strict;
 use CGI ':standard';

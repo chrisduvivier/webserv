@@ -18,8 +18,8 @@
 - Guide to Networking: [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/html/#pollman) -> maybe use it as a reference book.
 - [DWise1's Sockets Programming Pages Dealing With and Getting Around Blocking Sockets] (http://dwise1.net/pgm/sockets/blocking.html#NONBLOCK)
 - [Intro to Common Gateway Interface (CGI)](https://www.uregina.ca/science/cs/resources/create-personal-home-page/common-gateway-interface.html)
+- [HTTP CGI Programming](https://forhjy.medium.com/42-webserv-cgi-programming-66d63c3b22db)
 - [Things to remember when writing CGI scripts](http://astroa.physics.metu.edu.tr/MANUALS/cgi_perl.tut/basics.html)
-
 
 
 ## Getting on the HTTP Messages:
@@ -40,3 +40,6 @@
 ## Status Code
 - `GET`: indicates that a resource should be fetched.
 - `POST`: data is pushed to the server (creating or modifying a resource, or generating a temporary document to send back).
+
+## Some illustration
+- ![plot](./img/cgi_workflow.jpeg)
