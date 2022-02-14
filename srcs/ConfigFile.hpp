@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFile.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/03 15:33:10 by ldavids           #+#    #+#             */
-/*   Updated: 2022/02/10 15:06:03 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/02/14 16:18:53 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include <map>
+#include "ServerConfig.hpp"
 
 class ConfigFile
 {
@@ -43,10 +44,11 @@ class ConfigFile
 		void			location(int x);
 
 	public:
-		ConfigFile();
-		ConfigFile(char *file);
-		~ConfigFile();
-		
+					ConfigFile();
+					ConfigFile(char *file);
+					~ConfigFile();
+	ServerConfig	populate(int x);
+	int				get_server_nb();
 };
 
 
