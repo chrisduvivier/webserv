@@ -2,7 +2,6 @@
 
 int	ClientSocket::init()
 {
-	
 	bzero(&_address.sin_addr, sizeof(_address.sin_addr));
 
 	// Convert IPv4 and IPv6 addresses from text to binary form

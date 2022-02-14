@@ -1,35 +1,24 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
-# include <sys/types.h>
-# include <sys/uio.h>
-# include <fcntl.h>
-# include <unistd.h>
-# include <stdlib.h>
 # include <string.h>
-# include <limits.h>
-# include <stdio.h>
+# include <string>
 
-# include <cerrno>
+char*	strcat(std::string s1, std::string s2);
 
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 32
-# endif
+class nullptr_t 
+{
+	public:
+		template<class T>
+		inline operator T*() const // convertible to any type of null non-member pointer...
+		{ return 0; }
 
-# ifndef OPEN_MAX
-#  define OPEN_MAX 1024
-# endif
+		template<class C, class T>
+		inline operator T C::*() const   // or any type of null member pointer...
+		{ return 0; }
 
-int		get_next_line(int fd, char **line);
-
-/*
-**  helper functions
-*/
-
-size_t	ft_strlen(const char *s);
-char	*ft_strdup(const char *s1);
-char	*ft_strjoin(char const *s1, char const *s2);
-char	*ft_strchr(const char *s, int c);
-char	*ft_substr(char const *s, unsigned int start, size_t len);
+	private:
+		void operator&() const;  // Can't take address of nullptr
+};
 
 #endif

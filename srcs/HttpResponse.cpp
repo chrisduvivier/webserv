@@ -132,11 +132,15 @@ void	HttpResponse::handle_post_request(HttpRequest request)
 		int is_cgi_request = true;	// TODO
 		if (is_cgi_request == true)
 		{
-			// 
 			Cgi cgi(request);
 			int ret = cgi.execute_cgi(path);
 			if (ret < 0)
+			{
+				// error from execve/CGI
 				std::cerr << "cgi error \n";
+			}
+
+			// complete the response retrieve from the CGI
 			this->_protocol = "HTTP/1.1";
 			this->_status_code = 200;
 			this->_status_text = "OK";
