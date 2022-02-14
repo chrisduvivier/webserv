@@ -1,27 +1,42 @@
-# include "ServerSocket.hpp"
+#include "ServerSocket.hpp"
 #include "ServerConfig.hpp"
+#include "ConfigFile.hpp"
+#include <vector>
 
 # define PORT 8080
 
 int main(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
+	int i = 0;
+    if (argc > 2)
+	{
+		std::cerr << "Invalid args : use a config file as arg\n";
+		return (1);
+	}
+	ConfigFile conf_file((char *)argv[1]);
+	std::vector<ServerConfig>	Server_vector;
 
-	ServerConfig		server_info[20]; // maxed the numb of servers to 20 for now
+	while (i < conf_file.get_server_nb())
+	{
+		Server_vector.push_back(conf_file.populate(i));
+		/*std::cout << "server_vector.pushback created \n";*/
+		i++;
+	}
 
 	//	Getters and their use
-	/*std::cout << server_info[0].get_port()[0] << std::endl;
-	std::cout << server_info[0].get_server_names()[0] << std::endl;
-	std::cout << server_info[0].get_client_max_body_size() << std::endl;
-	std::map<int, std::string>::iterator	it1;
-	std::map<int, std::string>				error_page = server_info[0].get_error_pages();
-	it1 = error_page.begin();
-	std::cout << "error_nb = "<< it1->first << " and path = " << it1->second << std::endl;
-	std::map<std::string, std::string>::iterator	it2;
-	std::map<std::string, std::string>				location = server_info[0].get_location();
-	it2 = location.begin();
-	std::cout << "location = "<< it2->first << "\nblock = \n" << it2->second << std::endl;*/
+	/*std::vector<ServerConfig>::iterator it1 = Server_vector.begin();
+	std::cout << it1->get_port() << std::endl;
+	std::cout << it1->get_server_names()[0] << std::endl;
+	std::cout << it1->get_client_max_body_size() << std::endl;
+	std::cout << it1->get_host_name() << std::endl;
+	std::map<int, std::string>::iterator	it2;
+	std::map<int, std::string>				error_page = it1->get_error_pages();
+	it2 = error_page.begin();
+	std::cout << "error_nb = "<< it2->first << " and path = " << it2->second << std::endl;
+	std::map<std::string, std::string>::iterator	it3;
+	std::map<std::string, std::string>				location = it1->get_location();
+	it3 = location.begin();
+	std::cout << "location = "<< it3->first << "\nblock = \n" << it3->second << std::endl;*/
 
     // create a server socket instance and run it
     ServerSocket Server(PORT, INADDR_ANY, AF_INET, SOCK_STREAM, 0);
