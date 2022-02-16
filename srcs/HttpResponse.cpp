@@ -37,12 +37,12 @@ ServerConfig getServerConf() {
 		std::cout << "CLIENT MAX BODY SIZE : " << servConf.get_client_max_body_size() << std::endl;
 
 		std::map<int, std::string> error_page = servConf.get_error_pages();
-		for (std::map<int, std::string>::const_iterator it = error_page.begin(); it != error_page.end(); ++it)
+		for (std::map<int, std::string>::iterator it = error_page.begin(); it != error_page.end(); ++it)
 			std::cout << "ERROR: code: " << it->first << " location: " << it->second << std::endl;
 
-		std::map<std::string, std::string> location = servConf.get_location();
-		for (std::map<std::string, std::string>::const_iterator it = location.begin(); it != location.end(); ++it)
-			std::cout << "LOCATIONS : " << it->first << " | " << it->second << std::endl;
+		std::map<std::string, Location> location = servConf.get_location();
+		for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); ++it)
+			std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
 	}							/* -- display conf end ---*/
 	
 	return (servConf);
@@ -267,33 +267,33 @@ int	HttpResponse::check_method() {
 	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
 		return (400);
 
-	std::string location = this->get_location();
-	std::vector<std::string> allowed_method;
-	allowed_method = _serv.get_location[location].get_method();
-	std::string allow;
+	// std::string location = this->get_location();
+	// std::vector<std::string> allowed_method;
+	// allowed_method = _serv.get_location[location].get_method();
+	// std::string allow;
 
 	//Allow: GET, POST, DELETE
-	for (std::vector<std::string>::iterator it = allowed_method.begin(), it != allowed_method.end(), ++it)
-	{
-		if (it !=  allowed_method.begin())
-			allow += ", ";
-		allow += *it;
-	}
+	// for (std::vector<std::string>::iterator it = allowed_method.begin(), it != allowed_method.end(), ++it)
+	// {
+	// 	if (it !=  allowed_method.begin())
+	// 		allow += ", ";
+	// 	allow += *it;
+	// }
 
 	return (500);
 }
 
 std::string	HttpResponse::get_location() {
 
-	std::string location = this->_req.get_url();
-	std::map<std::string, Location> conf_location = this->_serv.get_location();
+	// std::string location = this->_req.get_url();
+	// std::map<std::string, Location> conf_location = this->_serv.get_location();
 
-	while (!conf_location.count(location)) //check if map contains location as key
-	{
-		size_t pos = location.find_last_of("/");
-		location = location.substr(0, pos);
-	}
-	return (location);
+	// while (!conf_location.count(location)) //check if map contains location as key
+	// {
+	// 	size_t pos = location.find_last_of("/");
+	// 	location = location.substr(0, pos);
+	// }
+	// return (location);
 }
 
 void	HttpResponse::simple_response(int code, std::string status, std::string path) {
