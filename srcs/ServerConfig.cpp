@@ -3,30 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 12:18:06 by ldavids           #+#    #+#             */
-/*   Updated: 2022/02/14 16:11:23 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/02/16 16:06:07 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerConfig.hpp"
 
-ServerConfig::ServerConfig() : _port()
+ServerConfig::ServerConfig()
 {
-	_port = 8080;
-	_host[0] = 127;
-	_host[1] = 0;
-	_host[2] = 0;
-	_host[3] = 1;
-	_host_name = "localhost";
-	_server_names[0] = "9gag.com";
-	_server_names[1] = "pronhubl.com";
-	_client_max_body_size = 1; // 1 mb is default on nginx
-	_error_pages.insert(std::make_pair(404, "/usr/share/nginx/html/custom_404.html"));
-	_error_pages.insert(std::make_pair(500, "/usr/share/nginx/html/custom_500.html"));
-	_location.insert(std::make_pair("/", "root /var/www/html \n method GET POST \n "));
-	_location.insert(std::make_pair("/favicon.ico", "method GET"));
 }
 
 ServerConfig::~ServerConfig()
@@ -72,7 +59,7 @@ std::map<int, std::string>		ServerConfig::get_error_pages()
 	return (_error_pages);
 }
 
-std::map<std::string, std::string>		ServerConfig::get_location()
+std::map<std::string, Location>		ServerConfig::get_location()
 {
 	return (_location);
 }
@@ -114,7 +101,7 @@ void									ServerConfig::set_error_pages(std::map<int, std::string> temp)
 	_error_pages = temp;
 }
 
-void									ServerConfig::set_location(std::map<std::string, std::string> temp)
+void									ServerConfig::set_location(std::map<std::string, Location> temp)
 {
 	_location = temp;
 }
