@@ -15,12 +15,15 @@
 
 # include "Cgi.hpp"
 
+# include "ConfigFile.hpp"
+# include "ServerConfig.hpp"
+
 class HttpResponse
 {
 	public:
 
 		HttpResponse();
-		HttpResponse(HttpRequest request);
+		HttpResponse(HttpRequest request /*, ServerConfig serv */);
 		// ~HttpResponse();
 
 		HttpResponse (const HttpResponse &copy) 
@@ -45,11 +48,17 @@ class HttpResponse
 		}
 
 		std::string	construct_response();
-		void		build_response(HttpRequest request);
-		void		handle_get_request(HttpRequest request);
-		void		handle_post_request(HttpRequest request);
-		void		handle_delete_request(HttpRequest request);
-		void		print();
+		void		build_response();
+		void		handle_get_request();
+		void		handle_post_request();
+		void		handle_delete_request();
+
+		void		print() const;
+		int			check_method();
+		std::string	get_location();
+		void		simple_response(int code, std::string status, std::string path);
+		std::string	get_response();
+
 
 	private:
 		std::string							_protocol;
@@ -57,6 +66,12 @@ class HttpResponse
 		std::string							_status_text;
 		std::map<std::string, std::string>	_headers;
 		std::string							_body;
+
+		std::string							_response;
+		ServerConfig						_serv;
+		HttpRequest							_req;
+
+
 
 };
 
