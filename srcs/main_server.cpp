@@ -5,15 +5,20 @@
 
 # define PORT 8080
 
+# define DEFAULT_CONF "./conf/default.conf"
+
 int main(int argc, char *argv[])
 {
 	int i = 0;
-    if (argc > 2)
+    std::string path = DEFAULT_CONF;
+	if (argc == 2)
+		path = argv[1];
+	else if (argc > 2)
 	{
-		std::cerr << "Invalid args : use a config file as arg\n";
+		std::cout << "Invalid number of arguments : webserv [conf.file]\n";
 		return (1);
 	}
-	ConfigFile conf_file((char *)argv[1]);
+	ConfigFile conf_file((char *)path.c_str());
 	std::vector<ServerConfig>	Server_vector;
 
 	while (i < conf_file.get_server_nb())

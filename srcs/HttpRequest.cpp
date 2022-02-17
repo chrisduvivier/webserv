@@ -15,8 +15,9 @@ HttpRequest::HttpRequest(char *buffer)
 	bool 				first_line = true;
 	bool				reading_headers = true;
 
-	while (std::getline(tmp_string_stream, line, '\n') && reading_headers == true)
+	while (reading_headers == true && std::getline(tmp_string_stream, line, '\n'))
 	{
+		line = line.substr(0, line.size()-1);		// remove the trailing `\r` char
 		if (reading_headers)
 		{
 			if (first_line)
@@ -33,9 +34,23 @@ HttpRequest::HttpRequest(char *buffer)
 		}
 	}
 	// read body
-	while (std::getline(tmp_string_stream, line, '\0'))
+	if ( this->_headers.find("Content-Length") == this->_headers.end() ) //not found
 	{
-		this->_body.append(line);
+		while (std::getline(tmp_string_stream, line))
+		{
+			// line = line.substr(0, line.size()-1);		// remove the trailing `\r` char
+			this->_body.append(line);
+			// delete[] tmp_buffer;
+		}
+	}
+	else // found
+	{
+		while (std::getline(tmp_string_stream, line))
+		{
+			std::stringstream tmp_content_length(this->_headers["Content-Length"]);
+			this->_body.append(line);
+			// delete[] tmp_buffer;
+		}
 	}
 	
 	std::cout << "------------   PRINTING   ------------\n";

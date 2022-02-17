@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl
   
 use strict;
 use CGI ':standard';
@@ -19,7 +19,7 @@ else
     $list = 'Null';
 }
   
-print header,
+# print header,
 start_html(-title=>$name),
 h1("Hello, $name"),
 h3 p('You have Submitted the following Data:'),

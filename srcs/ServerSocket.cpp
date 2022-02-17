@@ -22,11 +22,23 @@ void    ServerSocket::init()
 int	handle_connection(int client_sock)
 {
 	int		ret = 0;
+	static int	request_number = 0;
 	char	buffer[REQUEST_READ_BUFFER];
 	std::string	response = "HTTP/1.1 200 OK\r\n\r\n Congratulation !";	//default response
 
 	bzero(&buffer, REQUEST_READ_BUFFER);
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
+	
+	// TODO: ONLY TO KEEP TRACK OF CLIENT REQUEST. DELETE AT END
+	std::ofstream outfile;
+	outfile.open("request_log.txt", std::ios_base::app); // append instead of overwrite
+	std::stringstream tmp_request_number;
+	tmp_request_number << request_number;
+	outfile << "[" << tmp_request_number.str() << "]:";
+	request_number++;
+	outfile << std::string(buffer);
+	// UNTIL HERE
+
 	if (ret < 0)
 		throw MyException("Exception: Couldn't read from client socket");
 

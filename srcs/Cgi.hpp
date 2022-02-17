@@ -28,10 +28,10 @@ class Cgi
 		void    set_var(HttpRequest request);
 		void	set_env();
 		std::string get_body() const;
-		
 
 	private:
 		/* CGI Environment Variables */
+		std::string	_CONTENT_LENGTH;	// The length of the request body in bytes made available by the input stream or -1 if the length is not known.
 		std::string _GATEWAY_INTERFACE;	// The revision of the Common Gateway Interface that the server uses.
 		std::string _PATH_INFO;			// Extra path information passed to a CGI program.
 		std::string _PATH_TRANSLATED;	// The translated version of the path given by the variable PATH_INFO. (root of config + path_info)
@@ -48,7 +48,8 @@ class Cgi
 		// std::string _redirect_status;
 		std::string	_body;
 		char		**_args;
-		char		*_env[14];
+		bool		_error;
+		char		*_env[15];
 };
 
 #endif

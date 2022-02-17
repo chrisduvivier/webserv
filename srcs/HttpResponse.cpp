@@ -138,14 +138,20 @@ void	HttpResponse::handle_post_request(HttpRequest request)
 			{
 				// error from execve/CGI
 				std::cerr << "cgi error \n";
+				this->_protocol = "HTTP/1.1";
+				this->_status_code = 500;
+				this->_status_text = "Internal Server Error";
+				// TODO: redirect to 500.html error page?
+				return ;
 			}
 
 			// complete the response retrieve from the CGI
 			this->_protocol = "HTTP/1.1";
 			this->_status_code = 200;
 			this->_status_text = "OK";
+			this->_body = cgi.get_body();
 			int body_size = this->_body.length();
-			this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
+			this->_headers["Content-Type"] = "text/html";
 			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 		}
 		else
@@ -153,6 +159,8 @@ void	HttpResponse::handle_post_request(HttpRequest request)
 			std::cout << "TODO: UPLOAD request\n";
 		}
 	}
+	std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
+	this->print();
 }
 
 void	HttpResponse::handle_delete_request(HttpRequest request){

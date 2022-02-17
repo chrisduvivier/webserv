@@ -48,6 +48,7 @@ class HttpRequest
 		const std::string							get_url() const { return _url; };
 		const std::string							get_version() const { return _version; };
 		const std::map<std::string, std::string>	get_headers() const { return _headers; };
+		const std::string							get_body() const { return _body; };
 		
 	private:
 		std::string                                     _method;
