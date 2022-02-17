@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFile.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/03 15:33:10 by ldavids           #+#    #+#             */
-/*   Updated: 2022/02/14 16:18:53 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/02/16 16:08:18 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class ConfigFile
 		std::string								_server_name[50][50];
 		std::string								_client_max_body_size[50];
 		std::map<int, std::string>				_error_pages[50];
-		std::map<std::string, std::string>		_location[50];
+		std::map<std::string, Location>			_location[50];
 
 		std::string		clean_config(std::string	str);
 		void			divide_servers(std::string str);

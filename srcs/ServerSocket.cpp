@@ -44,10 +44,10 @@ int	handle_connection(int client_sock)
 
 	HttpRequest client_http_request(buffer);
 	
-	HttpResponse http_reponse;
-	http_reponse.build_response(client_http_request);
+	HttpResponse http_reponse(client_http_request);
+	http_reponse.build_response();
 	
-	response = http_reponse.construct_response();
+	response = http_reponse.get_response();
 
 	// "send" with a zero flags argument is equivalent to write(2).
 	// send doesn't always send all the bytes requested, it has to be used in a loop to ensure that all the data is correctly sent.
