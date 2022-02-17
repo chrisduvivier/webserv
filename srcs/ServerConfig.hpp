@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
+/*   By: rlinkov <rlinkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 11:30:54 by ldavids           #+#    #+#             */
-/*   Updated: 2022/02/16 16:12:45 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/02/17 15:12:33 by rlinkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class Location
 		std::string					_upload_path;
 		
 	public : 
+		Location() {};
 		Location(std::string	block)
 		{
 			_method = set_vector("method", block);
