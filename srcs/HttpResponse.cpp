@@ -1,11 +1,15 @@
 #include "HttpResponse.hpp"
 
+												/* ---- UTILS FUNCTIONS ---- */
 
-/* ---- UTILS FUNCTIONS ---- */
-
+/*
+	--
+		This function returns a map that contains ressources extension that are supported on the server as key
+		and their corresponding Content-Type as value
+	--
+*/
 std::map<std::string, std::string> ContentTypeList(){
 
-	//Supported Type
 	std::map<std::string, std::string> contentType;
 	contentType["html"] = "text/html; charset=utf-8";
 	contentType["txt"] = "text/plain; charset=utf-8";
@@ -19,6 +23,23 @@ std::map<std::string, std::string> ContentTypeList(){
 	return (contentType);
 }
 
+void	print_location(Location locations) {
+
+	std::vector<std::string> method = locations.get_method();
+	std::cout << "		method      :";
+	for (std::vector<std::string>::iterator i = method.begin(); i < method.end(); ++i)
+	{
+		std::cout << " " << *i;
+	}
+	std::cout << std::endl << "		redirection : " << locations.get_redirection() <<std::endl;
+	std::cout << "		directory   : " << locations.get_directory() <<std::endl;
+	std::cout << "		listing     : " << locations.get_listing() <<std::endl;
+	std::cout << "		default file: " << locations.get_default_file() <<std::endl;
+	std::cout << "		cgi         : " << locations.get_cgi() <<std::endl;
+	std::cout << "		upload path : " << locations.get_upload_path() <<std::endl;
+	
+
+}
 /* --- Should be pass to the HttpResponse, this function is only for tests purpose --- */
 
 ServerConfig getServerConf() {
@@ -41,14 +62,20 @@ ServerConfig getServerConf() {
 			std::cout << "ERROR: code: " << it->first << " location: " << it->second << std::endl;
 
 		std::map<std::string, Location> location = servConf.get_location();
+		std::cout << "LOCATIONS : " << std::endl;
 		for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); ++it)
-			std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
+		{
+			// std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
+			std::cout << "	location : " << it->first << std::endl;
+			print_location(it->second);
+		}
 	}							/* -- display conf end ---*/
 	
 	return (servConf);
 }
 
-/* ---- CLASS FUNCTIONS ---- */
+												/* ---- CLASS FUNCTIONS ---- */
+
 
 HttpResponse::HttpResponse() : _protocol("HTTP/1.1") {}
 
@@ -60,31 +87,40 @@ HttpResponse::HttpResponse(HttpRequest request/*, ServerConfig serv*/) : _protoc
 	this->_serv = getServerConf();
 }
 
+
 std::string	HttpResponse::get_response() {
 
 	this->_response = this->construct_response(); //to_change add construct in handling request without cgi
 	return (this->_response);
 }
 
+/*
+	--
+		This function assemble the different parts of the response to be
+		understandable for the client
+	--
+*/
 std::string	HttpResponse::construct_response() {
 
 	std::stringstream tmp;
 	std::string response;
 
-	// first line
-	tmp << this->_protocol << " " << this->_status_code << " " << this->_status_text << "\r\n";
+	tmp << this->_protocol << " " << this->_status_code << " " << this->_status_text << "\r\n"; // first line
 
-	// add Headers
-	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
+	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it) // add Headers
     	tmp << it->first << ": " << it->second << "\r\n";
 	
-	// add delimiter between headers and body. 
-	tmp << "\r\n" << this->_body;
+	tmp << "\r\n" << this->_body; // add delimiter between headers and body. 
 
 	response = tmp.str();
 	return (response);
 }
 
+/*
+	--
+		This function prints the response that will be sent to the client
+	--
+*/
 void	HttpResponse::print() const {
 
 	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
@@ -94,27 +130,14 @@ void	HttpResponse::print() const {
 	std::cout << this->_body << std::endl;
 }
 
+/*
+	--
+		This function will operate the different processes that will lead to
+		the creation of the appropriate response to the client
+	--
+*/
+void	HttpResponse::build_response() {
 
-void	HttpResponse::build_response()
-{
-	// if (this->_req.get_method() == "GET")
-	// {
-	// 	this->handle_get_request();
-	// }
-	// else if (this->_req.get_method() == "POST")
-	// {
-	// 	this->handle_post_request();
-	// }
-	// else if (this->_req.get_method() == "DELETE")
-	// {
-	// 	this->handle_delete_request();
-	// }
-	// else
-	// {
-	// 	this->check_method();
-	// 	//throw MyException("Exception: Unknown Method detected from request\n");
-	// }
-	
 	int code = this->check_method();
 
 	std::map<int, std::string> error = _serv.get_error_pages();
@@ -129,6 +152,78 @@ void	HttpResponse::build_response()
 		return (this->simple_response(501, "Not Implemented", error[501]));
 	}
 
+	return (this->simple_response(200, "OK", "./public_html" + _req.get_url()));
+
+}
+
+int	HttpResponse::check_method() {
+
+	/* --- check if method is implemented --- */
+	std::string method = _req.get_method();
+	if (method != "POST" && method != "GET" && method != "DELETE")
+		return (501);
+
+	/* --- check if method has enough headers --- */
+	std::map<std::string, std::string> headers = _req.get_headers();
+	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
+		return (400);
+
+	/* --- check if method is allowed --- */
+	std::string location = this->get_location();
+	std::vector<std::string> allowed_method;
+	allowed_method = _serv.get_location()[location].get_method();
+	std::string allow;
+	for (std::vector<std::string>::iterator it = allowed_method.begin(); it != allowed_method.end(); ++it)
+	{
+		if (it !=  allowed_method.begin())
+			allow += ", ";
+		allow += *it;
+	}
+	if (allow.find(method) == std::string::npos)
+	{
+		this->_headers["Allow"] = allow;
+		return (405);
+	}
+	return (200);
+}
+
+/*
+	--
+		This function will return the path to the location that contains the specific
+		rules to correctly treat the requested ressource
+	--
+*/
+std::string	HttpResponse::get_location() {
+
+	std::string location = this->_req.get_url();
+	std::map<std::string, Location> conf_location = this->_serv.get_location();
+
+	while (!conf_location.count(location)) //check if map contains location as key
+	{
+		size_t pos = location.find_last_of("/");
+		location = location.substr(0, pos + 1);
+	}
+	std::cout << "-- DEBUG --" << std::endl << "location: " << location << std::endl;
+	return (location);
+}
+
+void	HttpResponse::simple_response(int code, std::string status, std::string path) {
+
+	std::ifstream resource(path.c_str());
+
+	this->_protocol = "HTTP/1.1";
+	this->_status_code = code;
+	this->_status_text = status;
+	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
+
+	std::stringstream buff;
+	buff << resource.rdbuf();
+	resource.close();
+	this->_body = buff.str();
+	int body_size = this->_body.length();
+	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+	
+	this->print();
 }
 
 void	HttpResponse::handle_get_request()
@@ -263,62 +358,4 @@ void	HttpResponse::handle_delete_request(){
 			this->_status_text = "Internal Server Error";
 		}
 	}
-}
-
-int	HttpResponse::check_method() {
-
-	std::string method = _req.get_method();
-	if (method != "POST" && method != "GET" && method != "DELETE")
-		return (501);
-	
-	std::map<std::string, std::string> headers = _req.get_headers();
-	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
-		return (400);
-
-	// std::string location = this->get_location();
-	// std::vector<std::string> allowed_method;
-	// allowed_method = _serv.get_location[location].get_method();
-	// std::string allow;
-
-	//Allow: GET, POST, DELETE
-	// for (std::vector<std::string>::iterator it = allowed_method.begin(), it != allowed_method.end(), ++it)
-	// {
-	// 	if (it !=  allowed_method.begin())
-	// 		allow += ", ";
-	// 	allow += *it;
-	// }
-
-	return (500);
-}
-
-std::string	HttpResponse::get_location() {
-
-	// std::string location = this->_req.get_url();
-	// std::map<std::string, Location> conf_location = this->_serv.get_location();
-
-	// while (!conf_location.count(location)) //check if map contains location as key
-	// {
-	// 	size_t pos = location.find_last_of("/");
-	// 	location = location.substr(0, pos);
-	// }
-	// return (location);
-}
-
-void	HttpResponse::simple_response(int code, std::string status, std::string path) {
-
-	std::ifstream resource(path.c_str());
-
-	this->_protocol = "HTTP/1.1";
-	this->_status_code = code;
-	this->_status_text = status;
-	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
-
-	std::stringstream buff;
-	buff << resource.rdbuf();
-	resource.close();
-	this->_body = buff.str();
-	int body_size = this->_body.length();
-	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-	
-	this->print();
 }
