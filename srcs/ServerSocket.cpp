@@ -44,10 +44,9 @@ int	handle_connection(int client_sock)
 
 	HttpRequest client_http_request(buffer);
 	
-	HttpResponse http_reponse(client_http_request);
-	http_reponse.build_response();
-	
-	response = http_reponse.get_response();
+	HttpResponse http_response(client_http_request);
+	http_response.build_response();
+	response = http_response.get_response();
 
 	// "send" with a zero flags argument is equivalent to write(2).
 	// send doesn't always send all the bytes requested, it has to be used in a loop to ensure that all the data is correctly sent.
@@ -94,7 +93,7 @@ int ServerSocket::run()
 			return (-1);
 		}
 
-		std::cout << "\n+++++++ Waiting for new connection ++++++++\n";
+		std::cout << "+++++++ Waiting for new connection ++++++++\n";
 		for (int i=0; i < FD_SETSIZE; i++)
 		{
 			// check if server_socket current_sockets, in other word, that is ready for reading right now.
