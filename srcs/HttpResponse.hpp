@@ -55,7 +55,9 @@ class HttpResponse
 
 		void		print() const;
 		int			check_method();
+		int			check_redirection();
 		std::string	get_location();
+		void		simple_response(int code, std::string status);
 		void		simple_response(int code, std::string status, std::string path);
 		std::string	get_response();
 

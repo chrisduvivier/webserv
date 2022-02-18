@@ -138,12 +138,21 @@ void	HttpResponse::print() const {
 */
 void	HttpResponse::build_response() {
 
-	int code = this->check_method();
+	//Changes have to be made in check_redirection to make a proper Location (remove ./)
+	//changes in Location ? or in code ? Or maybe write public_html instead of ./public_html ?
 
+
+	int code = this->check_method();
+	if (code == 200)
+		code = this->check_redirection();
 	std::map<int, std::string> error = _serv.get_error_pages();
 	switch(code) {
+	case 301:
+		return (this->simple_response(301, "Moved Permanently"));
 	case 400:
 		return (this->simple_response(400, "Bad Request", error[400]));
+	case 404:
+		return (this->simple_response(404, "Not Found", error[404]));
 	case 405:
 		return (this->simple_response(405, "Not Allowed", error[405]));
 	case 500:
@@ -151,24 +160,30 @@ void	HttpResponse::build_response() {
 	case 501:
 		return (this->simple_response(501, "Not Implemented", error[501]));
 	}
-
-	return (this->simple_response(200, "OK", "./public_html" + _req.get_url()));
-
+	
+	std::string ressource = this->_req.get_url();
+	std::string directory = this->_serv.get_location()[this->get_location()].get_directory();
+	std::ifstream ifs(directory + ressource);
+	if (!ifs)
+		return (this->simple_response(404, "Not Found", error[404]));
+	return (this->simple_response(200, "OK", directory + ressource));
 }
 
+/*
+	--
+		1. Check if method is implemented on the server
+		2. Check if method has mandatory headers
+		3. Check if method is allowed on location
+	--
+*/
 int	HttpResponse::check_method() {
-
-	/* --- check if method is implemented --- */
 	std::string method = _req.get_method();
 	if (method != "POST" && method != "GET" && method != "DELETE")
 		return (501);
 
-	/* --- check if method has enough headers --- */
 	std::map<std::string, std::string> headers = _req.get_headers();
 	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
 		return (400);
-
-	/* --- check if method is allowed --- */
 	std::string location = this->get_location();
 	std::vector<std::string> allowed_method;
 	allowed_method = _serv.get_location()[location].get_method();
@@ -187,6 +202,23 @@ int	HttpResponse::check_method() {
 	return (200);
 }
 
+int	HttpResponse::check_redirection() {
+	
+	std::string location = this->get_location();
+	if (this->_serv.get_location()[location].get_redirection().empty())
+		return (200);
+	
+	std::string new_url = this->_req.get_url();
+	new_url = new_url.erase(0, location.length() + 1);
+
+	std::cout << "new_url:" << new_url << std::endl;
+
+	std::string directory = this->_serv.get_location()[this->get_location()].get_redirection();
+	this->_headers["Location"] = "http://localhost:8080/" + directory + new_url;
+	std::ifstream ifs(directory + new_url);
+	return (301);
+}
+
 /*
 	--
 		This function will return the path to the location that contains the specific
@@ -201,10 +233,20 @@ std::string	HttpResponse::get_location() {
 	while (!conf_location.count(location)) //check if map contains location as key
 	{
 		size_t pos = location.find_last_of("/");
-		location = location.substr(0, pos + 1);
+		if (pos)
+			location = location.substr(0, pos);
+		else
+			location = location.substr(0, pos + 1);
 	}
 	std::cout << "-- DEBUG --" << std::endl << "location: " << location << std::endl;
 	return (location);
+}
+
+void	HttpResponse::simple_response(int code, std::string status) {
+
+	this->_protocol = "HTTP/1.1";
+	this->_status_code = code;
+	this->_status_text = status;
 }
 
 void	HttpResponse::simple_response(int code, std::string status, std::string path) {
@@ -214,6 +256,7 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	this->_protocol = "HTTP/1.1";
 	this->_status_code = code;
 	this->_status_text = status;
+
 	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
 
 	std::stringstream buff;
@@ -222,8 +265,7 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	this->_body = buff.str();
 	int body_size = this->_body.length();
 	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-	
-	this->print();
+	// this->print();
 }
 
 void	HttpResponse::handle_get_request()
