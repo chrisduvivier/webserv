@@ -90,7 +90,6 @@ HttpResponse::HttpResponse(HttpRequest request/*, ServerConfig serv*/) : _protoc
 
 std::string	HttpResponse::get_response() {
 
-	this->_response = this->construct_response(); //to_change add construct in handling request without cgi
 	return (this->_response);
 }
 
@@ -123,11 +122,13 @@ std::string	HttpResponse::construct_response() {
 */
 void	HttpResponse::print() const {
 
+	std::cout << "-- DEBUG -- HttpResponse --" << std::endl;
 	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
 	for(std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 	std::cout << std::endl;
-	std::cout << this->_body << std::endl;
+	
+	// std::cout << this->_body << std::endl;
 }
 
 /*
@@ -161,12 +162,11 @@ void	HttpResponse::build_response() {
 		return (this->simple_response(501, "Not Implemented", error[501]));
 	}
 	
-	std::string ressource = this->_req.get_url();
-	std::string directory = this->_serv.get_location()[this->get_location()].get_directory();
-	std::ifstream ifs(directory + ressource);
+	std::string path = this->build_resource_path(code);
+	std::ifstream ifs(path);
 	if (!ifs)
 		return (this->simple_response(404, "Not Found", error[404]));
-	return (this->simple_response(200, "OK", directory + ressource));
+	return (this->simple_response(200, "OK", path));
 }
 
 /*
@@ -202,20 +202,20 @@ int	HttpResponse::check_method() {
 	return (200);
 }
 
+/*
+	--
+		This function checks if the ressource requested by the client has been moved to 
+		another directory and complete the HttpReponse header with the new url in that case
+	--
+*/
 int	HttpResponse::check_redirection() {
 	
 	std::string location = this->get_location();
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (200);
 	
-	std::string new_url = this->_req.get_url();
-	new_url = new_url.erase(0, location.length() + 1);
-
-	std::cout << "new_url:" << new_url << std::endl;
-
-	std::string directory = this->_serv.get_location()[this->get_location()].get_redirection();
-	this->_headers["Location"] = "http://localhost:8080/" + directory + new_url;
-	std::ifstream ifs(directory + new_url);
+	this->_headers["Location"] = "http://localhost:8080" + this->build_resource_path(301); //Change hardcoded host
+	// this->_headers["Location"] = this->_serv.get_host() + ':' + this->_serv.get_port() + this->build_resource_path(301); //smth like that
 	return (301);
 }
 
@@ -242,11 +242,35 @@ std::string	HttpResponse::get_location() {
 	return (location);
 }
 
+/*
+	--
+		This function will return the path to the ressource 
+		that is requested by the client
+	--
+*/
+std::string HttpResponse::build_resource_path(int status) {
+
+	std::string path = this->_req.get_url();
+	if (status == 301)
+	{
+		size_t to_erase = this->get_location().length();
+		path.erase(0, to_erase + 1);
+		path = this->_serv.get_location()[this->get_location()].get_redirection() + path;
+	}
+	else
+		path = '.' + this->_serv.get_location()[this->get_location()].get_directory() + path;
+
+	std::cout << "-- DEBUG --" << std::endl << "path: " << path << std::endl;
+	return (path);
+}
+
 void	HttpResponse::simple_response(int code, std::string status) {
 
 	this->_protocol = "HTTP/1.1";
 	this->_status_code = code;
 	this->_status_text = status;
+	this->_response = this->construct_response();
+	this->print();
 }
 
 void	HttpResponse::simple_response(int code, std::string status, std::string path) {
@@ -265,7 +289,8 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	this->_body = buff.str();
 	int body_size = this->_body.length();
 	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-	// this->print();
+	this->_response = this->construct_response();
+	this->print();
 }
 
 void	HttpResponse::handle_get_request()
