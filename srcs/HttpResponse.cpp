@@ -59,7 +59,7 @@ ServerConfig getServerConf() {
 
 		std::map<int, std::string> error_page = servConf.get_error_pages();
 		for (std::map<int, std::string>::iterator it = error_page.begin(); it != error_page.end(); ++it)
-			std::cout << "ERROR: code: " << it->first << " location: " << it->second << std::endl;
+			std::cout << "[INFO] ERROR-CODE: " << it->first << "-> location: " << it->second << std::endl;
 
 		std::map<std::string, Location> location = servConf.get_location();
 		std::cout << "LOCATIONS : " << std::endl;
@@ -163,8 +163,9 @@ void	HttpResponse::build_response() {
 	
 	std::string ressource = this->_req.get_url();
 	std::string directory = this->_serv.get_location()[this->get_location()].get_directory();
-	std::ifstream ifs(directory + ressource);
-	if (!ifs)
+	std::ifstream ifs((directory + ressource).c_str());
+	
+	if (!ifs) //if file does not exist
 		return (this->simple_response(404, "Not Found", error[404]));
 	return (this->simple_response(200, "OK", directory + ressource));
 }
@@ -215,7 +216,7 @@ int	HttpResponse::check_redirection() {
 
 	std::string directory = this->_serv.get_location()[this->get_location()].get_redirection();
 	this->_headers["Location"] = "http://localhost:8080/" + directory + new_url;
-	std::ifstream ifs(directory + new_url);
+	std::ifstream ifs((directory + new_url).c_str());
 	return (301);
 }
 
@@ -256,6 +257,15 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	this->_protocol = "HTTP/1.1";
 	this->_status_code = code;
 	this->_status_text = status;
+
+	if (this->_req.get_method() == "GET")
+		this->handle_get_request();
+	else if (this->_req.get_method() == "POST")
+		this->handle_post_request();
+	else if (this->_req.get_method() == "DELETE")
+		this->handle_delete_request();
+	else
+		throw MyException("Exception: Unknown Method detected from request\n");
 
 	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
 
