@@ -23,6 +23,22 @@ std::map<std::string, std::string> ContentTypeList(){
 	return (contentType);
 }
 
+/*
+	--
+		Checks if the path given as parameter leads to a directory
+	--
+*/
+int	is_directory(const char *path) {
+
+	std::cout << "is_directory IN" << std::endl;
+	struct stat stats;
+
+    stat(path, &stats);
+    if (S_ISDIR(stats.st_mode))
+        return 1;
+    return 0;
+}
+
 void	print_location(Location locations) {
 
 	std::vector<std::string> method = locations.get_method();
@@ -163,10 +179,13 @@ void	HttpResponse::build_response() {
 	}
 	
 	std::string path = this->build_resource_path(code);
+
 	std::ifstream ifs(path);
 	if (!ifs)
 		return (this->simple_response(404, "Not Found", error[404]));
-	return (this->simple_response(200, "OK", path));
+	if (!(is_directory(path.c_str())))
+		return (this->simple_response(200, "OK", path));
+	return (this->directory_response());
 }
 
 /*
@@ -260,7 +279,10 @@ std::string HttpResponse::build_resource_path(int status) {
 	else
 		path = '.' + this->_serv.get_location()[this->get_location()].get_directory() + path;
 
+	if (is_directory(path.c_str()) && path.back() != '/')
+		path = path + '/';
 	std::cout << "-- DEBUG --" << std::endl << "path: " << path << std::endl;
+
 	return (path);
 }
 
@@ -287,6 +309,63 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	buff << resource.rdbuf();
 	resource.close();
 	this->_body = buff.str();
+	int body_size = this->_body.length();
+	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+	this->_response = this->construct_response();
+	this->print();
+}
+
+void	HttpResponse::directory_response() {
+
+	std::cout << "directory_response IN" << std::endl;
+	std::string location = this->get_location();
+
+
+	std::cout << "DEFAULT FILE: " << _serv.get_location()[location].get_default_file() << std::endl;
+	if (!_serv.get_location()[location].get_default_file().empty())
+	{
+		std::cout << "directory_response Default" << std::endl;
+		std::string path = _serv.get_location()[location].get_default_file();
+		return (this->simple_response(200, "OK", path));
+	}
+	if (!_serv.get_location()[location].get_listing())
+		return (this->simple_response(200, "OK"));
+
+	/* --- building Index of HTML page -- */
+
+	std::cout << "directory_response Listing 1" << std::endl;
+	DIR *dp;
+	struct dirent *ep;
+	std::string body;
+
+	dp = opendir (this->build_resource_path(200).c_str());
+	if (dp != NULL)
+	{
+		body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + this->_req.get_url() + "</h1>\n";
+		body = body + "   <p>		______________________________________________________________________________________		</p>\n";
+		body = body + "   </br></br></br>";
+		while ((ep = readdir (dp)))
+		{
+			body = body + "  <a href=\"http://localhost:8080" + this->_req.get_url() + ep->d_name + "\">" + ep->d_name + "</a></br>";
+			body += '\n';
+		}
+		body += " </body>\n</html>";
+		if ((closedir(dp) == -1))
+			return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
+	}
+	else
+		return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
+
+	std::cout << "=====		BODY	DEBUG		 	 =====" << std::endl;
+	std::cout << body << std::endl;
+	std::cout << "=====		BODY	DEBUG	END		 =====" << std::endl;
+
+	this->_protocol = "HTTP/1.1";
+	this->_status_code = 200;
+	this->_status_text = "OK";
+
+	this->_headers["Content-Type"] = "text/html; charset=utf-8";
+	this->_body = body;
 	int body_size = this->_body.length();
 	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 	this->_response = this->construct_response();

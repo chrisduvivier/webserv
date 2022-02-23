@@ -18,6 +18,13 @@
 # include "ConfigFile.hpp"
 # include "ServerConfig.hpp"
 
+//used to identify directory
+# include <sys/stat.h>
+
+//used to read into a directory
+# include <sys/types.h>
+# include <dirent.h>
+
 class HttpResponse
 {
 	public:
@@ -60,6 +67,7 @@ class HttpResponse
 		std::string build_resource_path(int status);
 		void		simple_response(int code, std::string status);
 		void		simple_response(int code, std::string status, std::string path);
+		void		directory_response();
 		std::string	get_response();
 
 
