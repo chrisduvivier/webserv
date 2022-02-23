@@ -320,18 +320,15 @@ void	HttpResponse::directory_response() {
 	std::cout << "directory_response IN" << std::endl;
 	std::string location = this->get_location();
 
-
-	std::cout << "DEFAULT FILE: " << _serv.get_location()[location].get_default_file() << std::endl;
 	if (!_serv.get_location()[location].get_default_file().empty())
 	{
-		std::cout << "directory_response Default" << std::endl;
 		std::string path = _serv.get_location()[location].get_default_file();
 		return (this->simple_response(200, "OK", path));
 	}
 	if (!_serv.get_location()[location].get_listing())
 		return (this->simple_response(200, "OK"));
 
-	/* --- building Index of HTML page -- */
+	/* --- building 'Index of' HTML page -- */
 
 	std::cout << "directory_response Listing 1" << std::endl;
 	DIR *dp;
@@ -341,12 +338,15 @@ void	HttpResponse::directory_response() {
 	dp = opendir (this->build_resource_path(200).c_str());
 	if (dp != NULL)
 	{
-		body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + this->_req.get_url() + "</h1>\n";
+		std::string url = this->_req.get_url();
+		if (url.back() != '/')
+			url += '/';
+		body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + url + "</h1>\n";
 		body = body + "   <p>		______________________________________________________________________________________		</p>\n";
 		body = body + "   </br></br></br>";
 		while ((ep = readdir (dp)))
 		{
-			body = body + "  <a href=\"http://localhost:8080" + this->_req.get_url() + ep->d_name + "\">" + ep->d_name + "</a></br>";
+			body = body + "  <a href=\"http://localhost:8080" + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
 			body += '\n';
 		}
 		body += " </body>\n</html>";
@@ -355,10 +355,6 @@ void	HttpResponse::directory_response() {
 	}
 	else
 		return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
-
-	std::cout << "=====		BODY	DEBUG		 	 =====" << std::endl;
-	std::cout << body << std::endl;
-	std::cout << "=====		BODY	DEBUG	END		 =====" << std::endl;
 
 	this->_protocol = "HTTP/1.1";
 	this->_status_code = 200;
