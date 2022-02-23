@@ -19,6 +19,7 @@ std::map<std::string, std::string> ContentTypeList(){
 	contentType["bmp"] = "image/bmp";
 	contentType["webp"] = "image/webp";
 	contentType["ico"] = "image/vnd.microsoft.icon";
+	contentType["cgi"] = "cgi";
 
 	return (contentType);
 }
@@ -138,7 +139,7 @@ std::string	HttpResponse::construct_response() {
 */
 void	HttpResponse::print() const {
 
-	std::cout << "-- DEBUG -- HttpResponse --" << std::endl;
+	std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
 	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
 	for(std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
@@ -181,11 +182,35 @@ void	HttpResponse::build_response() {
 	std::string path = this->build_resource_path(code);
 
 	std::ifstream ifs(path);
-	if (!ifs)
+	if (!ifs && _req.get_method() != "POST")
 		return (this->simple_response(404, "Not Found", error[404]));
-	if (!(is_directory(path.c_str())))
-		return (this->simple_response(200, "OK", path));
-	return (this->directory_response());
+
+	std::string extension;
+	size_t pos = path.find('.', 1);
+	if (pos != std::string::npos)
+	{
+		extension = path.substr(pos + 1);
+		pos = extension.find("?");
+		if (pos != std::string::npos)
+			extension = extension.erase(pos, std::string::npos);
+	}
+
+	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
+	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
+
+	if (extension == "cgi") //handling CGI
+	{
+		Cgi cgi(this->_req);
+		int ret = cgi.execute_cgi(path);
+		if (ret < 0)
+			return (this->simple_response(500, "Internal Server Error", error[500]));
+		return ; //? simple return if the cgi is called ?
+	}
+
+	if ((is_directory(path.c_str())))
+		return (this->directory_response());
+	return (this->simple_response(200, "OK", path));
+	
 }
 
 /*
@@ -279,8 +304,6 @@ std::string HttpResponse::build_resource_path(int status) {
 	else
 		path = '.' + this->_serv.get_location()[this->get_location()].get_directory() + path;
 
-	if (is_directory(path.c_str()) && path.back() != '/')
-		path = path + '/';
 	std::cout << "-- DEBUG --" << std::endl << "path: " << path << std::endl;
 
 	return (path);
@@ -410,7 +433,6 @@ void	HttpResponse::handle_get_request()
 		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 		// this->_headers["Content-Length"] = std::to_string(this->_body.length());
 
-		std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
 		this->print();
 	}
 
