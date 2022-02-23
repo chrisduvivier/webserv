@@ -6,7 +6,7 @@
 /*   By: rlinkov <rlinkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 11:30:54 by ldavids           #+#    #+#             */
-/*   Updated: 2022/02/17 15:12:33 by rlinkov          ###   ########.fr       */
+/*   Updated: 2022/02/23 15:39:08 by rlinkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,16 @@ class Location
 		
 	public : 
 		Location() {};
-		Location(std::string	block)
-		{
-			_method = set_vector("method", block);
-			_redirection = set_string("redirection", block);
-			_directory = set_string("directory", block);
-			_default_file = set_string("default_file", block);
-			_cgi = set_string("cgi", block);
-			_upload_path = set_string("upload_path", block);
-			_listing = set_int("listing", block);
-		}
+        Location(std::string    block)
+        {
+            _method = set_vector("method", block);
+            _redirection = set_string("redirection", block);
+            _directory = set_string("directory", block);
+            _default_file = set_string("default", block);
+            _cgi = set_string("cgi", block);
+            _upload_path = set_string("upload_path", block);
+            _listing = set_int("listing", block);
+        }
 		~Location()
 		{
 		}
