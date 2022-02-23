@@ -47,28 +47,28 @@ ServerConfig getServerConf() {
 	ServerConfig servConf = conf.populate(0);
 
 	{							/* --- display conf --- */
-		std::cout << "PORT : " <<  servConf.get_port() << std::endl;
-		std::cout << "HOST : " << servConf.get_host() << std::endl;
-		std::cout << "HOST NAME : " << servConf.get_host_name() << std::endl;
-		for (size_t i = 0; i < 50; i++)
-		{
-			if (!servConf.get_server_names()[i].empty())
-				std::cout << "SERVER NAME[" << i << "] : " << servConf.get_server_names()[i] << std::endl;
-		}
-		std::cout << "CLIENT MAX BODY SIZE : " << servConf.get_client_max_body_size() << std::endl;
+		// std::cout << "PORT : " <<  servConf.get_port() << std::endl;
+		// std::cout << "HOST : " << servConf.get_host() << std::endl;
+		// std::cout << "HOST NAME : " << servConf.get_host_name() << std::endl;
+		// for (size_t i = 0; i < 50; i++)
+		// {
+		// 	if (!servConf.get_server_names()[i].empty())
+		// 		std::cout << "SERVER NAME[" << i << "] : " << servConf.get_server_names()[i] << std::endl;
+		// }
+		// std::cout << "CLIENT MAX BODY SIZE : " << servConf.get_client_max_body_size() << std::endl;
 
-		std::map<int, std::string> error_page = servConf.get_error_pages();
-		for (std::map<int, std::string>::iterator it = error_page.begin(); it != error_page.end(); ++it)
-			std::cout << "[INFO] ERROR-CODE: " << it->first << "-> location: " << it->second << std::endl;
+		// std::map<int, std::string> error_page = servConf.get_error_pages();
+		// for (std::map<int, std::string>::iterator it = error_page.begin(); it != error_page.end(); ++it)
+		// 	std::cout << "[INFO] ERROR-CODE: " << it->first << "-> location: " << it->second << std::endl;
 
-		std::map<std::string, Location> location = servConf.get_location();
-		std::cout << "LOCATIONS : " << std::endl;
-		for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); ++it)
-		{
-			// std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
-			std::cout << "	location : " << it->first << std::endl;
-			print_location(it->second);
-		}
+		// std::map<std::string, Location> location = servConf.get_location();
+		// std::cout << "LOCATIONS : " << std::endl;
+		// for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); ++it)
+		// {
+		// 	// std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
+		// 	std::cout << "	location : " << it->first << std::endl;
+		// 	print_location(it->second);
+		// }
 	}							/* -- display conf end ---*/
 	
 	return (servConf);
@@ -239,7 +239,7 @@ std::string	HttpResponse::get_location() {
 		else
 			location = location.substr(0, pos + 1);
 	}
-	std::cout << "-- DEBUG --" << std::endl << "location: " << location << std::endl;
+	// std::cout << "-- DEBUG --" << std::endl << "location: " << location << std::endl;
 	return (location);
 }
 
@@ -267,14 +267,14 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	else
 		throw MyException("Exception: Unknown Method detected from request\n");
 
-	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
+	// this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
 
-	std::stringstream buff;
-	buff << resource.rdbuf();
-	resource.close();
-	this->_body = buff.str();
-	int body_size = this->_body.length();
-	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+	// std::stringstream buff;
+	// buff << resource.rdbuf();
+	// resource.close();
+	// this->_body = buff.str();
+	// int body_size = this->_body.length();
+	// this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 	// this->print();
 }
 
@@ -302,7 +302,7 @@ void	HttpResponse::handle_get_request()
 			resource.close();
 
 
-			getServerConf();
+			// getServerConf();
 
 			return ;
 		}
@@ -320,8 +320,8 @@ void	HttpResponse::handle_get_request()
 		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 		// this->_headers["Content-Length"] = std::to_string(this->_body.length());
 
-		std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
-		this->print();
+		// std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
+		// this->print();
 	}
 
 }
@@ -341,6 +341,7 @@ void	HttpResponse::handle_post_request()
 		int is_cgi_request = true;	// TODO
 		if (is_cgi_request == true)
 		{
+			std::cout << "+++++++++++++++++++++cgi request's body+++++++++++++++++++\n["  << this->_req.get_body() << "]" << std::endl;
 			Cgi cgi(this->_req);
 			int ret = cgi.execute_cgi(path);
 			if (ret < 0)
@@ -359,6 +360,7 @@ void	HttpResponse::handle_post_request()
 			this->_status_code = 200;
 			this->_status_text = "OK";
 			this->_body = cgi.get_body();
+			std::cout << "+++++++++++++++++++++cgi body+++++++++++++++++++\n["  << this->_body << "]" << std::endl;
 			int body_size = this->_body.length();
 			this->_headers["Content-Type"] = "text/html";
 			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
@@ -368,8 +370,9 @@ void	HttpResponse::handle_post_request()
 			std::cout << "TODO: UPLOAD request\n";
 		}
 	}
-	std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
+	std::cout << "-----------PRINT RESPONSE TO POST REQ TO CLIENT-----------" << std::endl;
 	this->print();
+	std::cout << "----------------------------------------------------------" << std::endl;
 }
 
 void	HttpResponse::handle_delete_request(){

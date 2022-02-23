@@ -7,6 +7,11 @@
 #include <vector>
 #include <stdlib.h>
 
+# define RED "\033[31m"
+# define GREEN "\033[32m"
+# define YELLOW "\033[33m"
+# define RESET "\033[0m"
+
 char*	strcat(std::string s1, std::string s2);
 
 class nullptr_t 
