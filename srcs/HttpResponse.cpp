@@ -181,7 +181,7 @@ void	HttpResponse::build_response() {
 	
 	std::string path = this->build_resource_path(code);
 
-	std::ifstream ifs(path);
+	std::ifstream ifs(path.c_str());
 	if (!ifs && _req.get_method() != "POST")
 		return (this->simple_response(404, "Not Found", error[404]));
 
@@ -362,7 +362,7 @@ void	HttpResponse::directory_response() {
 	if (dp != NULL)
 	{
 		std::string url = this->_req.get_url();
-		if (url.back() != '/')
+		if (url[url.length() - 1] != '/')
 			url += '/';
 		body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + url + "</h1>\n";
 		body = body + "   <p>		______________________________________________________________________________________		</p>\n";
