@@ -54,7 +54,6 @@ class Cgi
 		std::string _SERVER_SOFTWARE;	// The name and version of the server software that is answering the client request.
 		// std::string _redirect_status;
 		std::string	_body;
-		char		**_args;
 		bool		_error;
 		char		*_env[15];
 };

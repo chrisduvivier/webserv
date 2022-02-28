@@ -199,29 +199,27 @@ void	HttpResponse::build_response() {
 	if (!ifs && _req.get_method() != "POST")
 		return (this->simple_response(404, "Not Found", error[404]));
 
-	// std::string extension;
-	// size_t pos = path.find('.', 1);
-	// if (pos != std::string::npos)
-	// {
-	// 	extension = path.substr(pos + 1);
-	// 	pos = extension.find("?");
-	// 	if (pos != std::string::npos)
-	// 		extension = extension.erase(pos, std::string::npos);
-	// }
-
 	std::string extension = get_file_ext(path);
 
 	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
 	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
 
-	// if (extension == "cgi") //handling CGI
-	// {
-	// 	Cgi cgi(this->_req);
-	// 	int ret = cgi.execute_cgi(path);
-	// 	if (ret < 0)
-	// 		return (this->simple_response(500, "Internal Server Error", error[500]));
-	// 	return ; //? simple return if the cgi is called ?
-	// }
+	if (extension == "cgi") //handling CGI
+	{
+		Cgi cgi(this->_req);
+		int ret = cgi.execute_cgi(path);
+		if (ret < 0)
+			return (this->simple_response(500, "Internal Server Error", error[500]));
+		
+		this->_protocol = "HTTP/1.1";
+		this->_status_code = code;
+		this->_status_text = "OK";
+		this->_body = cgi.get_body();	//read cgi execution's output
+		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << this->_body.length()) )->str();
+		this->_response = this->construct_response();
+		this->print();
+		return ; //? simple return if the cgi is called ?
+	}
 
 	if ((is_directory(path.c_str())))
 		return (this->directory_response());
