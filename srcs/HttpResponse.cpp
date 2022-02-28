@@ -19,8 +19,25 @@ std::map<std::string, std::string> ContentTypeList(){
 	contentType["bmp"] = "image/bmp";
 	contentType["webp"] = "image/webp";
 	contentType["ico"] = "image/vnd.microsoft.icon";
+	contentType["cgi"] = "cgi";
 
 	return (contentType);
+}
+
+/*
+	--
+		Checks if the path given as parameter leads to a directory
+	--
+*/
+int	is_directory(const char *path) {
+
+	std::cout << "is_directory IN" << std::endl;
+	struct stat stats;
+
+    stat(path, &stats);
+    if (S_ISDIR(stats.st_mode))
+        return 1;
+    return 0;
 }
 
 void	print_location(Location locations) {
@@ -90,7 +107,6 @@ HttpResponse::HttpResponse(HttpRequest request/*, ServerConfig serv*/) : _protoc
 
 std::string	HttpResponse::get_response() {
 
-	this->_response = this->construct_response(); //to_change add construct in handling request without cgi
 	return (this->_response);
 }
 
@@ -123,11 +139,13 @@ std::string	HttpResponse::construct_response() {
 */
 void	HttpResponse::print() const {
 
+	std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
 	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
 	for(std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 	std::cout << std::endl;
-	std::cout << this->_body << std::endl;
+	
+	// std::cout << this->_body << std::endl;
 }
 
 /*
@@ -161,13 +179,38 @@ void	HttpResponse::build_response() {
 		return (this->simple_response(501, "Not Implemented", error[501]));
 	}
 	
-	std::string ressource = this->_req.get_url();
-	std::string directory = this->_serv.get_location()[this->get_location()].get_directory();
-	std::ifstream ifs((directory + ressource).c_str());
-	
-	if (!ifs) //if file does not exist
+	std::string path = this->build_resource_path(code);
+
+	std::ifstream ifs(path.c_str());
+	if (!ifs && _req.get_method() != "POST")
 		return (this->simple_response(404, "Not Found", error[404]));
-	return (this->simple_response(200, "OK", directory + ressource));
+
+	std::string extension;
+	size_t pos = path.find('.', 1);
+	if (pos != std::string::npos)
+	{
+		extension = path.substr(pos + 1);
+		pos = extension.find("?");
+		if (pos != std::string::npos)
+			extension = extension.erase(pos, std::string::npos);
+	}
+
+	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
+	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
+
+	if (extension == "cgi") //handling CGI
+	{
+		Cgi cgi(this->_req);
+		int ret = cgi.execute_cgi(path);
+		if (ret < 0)
+			return (this->simple_response(500, "Internal Server Error", error[500]));
+		return ; //? simple return if the cgi is called ?
+	}
+
+	if ((is_directory(path.c_str())))
+		return (this->directory_response());
+	return (this->simple_response(200, "OK", path));
+	
 }
 
 /*
@@ -203,20 +246,20 @@ int	HttpResponse::check_method() {
 	return (200);
 }
 
+/*
+	--
+		This function checks if the ressource requested by the client has been moved to 
+		another directory and complete the HttpReponse header with the new url in that case
+	--
+*/
 int	HttpResponse::check_redirection() {
 	
 	std::string location = this->get_location();
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (200);
 	
-	std::string new_url = this->_req.get_url();
-	new_url = new_url.erase(0, location.length() + 1);
-
-	std::cout << "new_url:" << new_url << std::endl;
-
-	std::string directory = this->_serv.get_location()[this->get_location()].get_redirection();
-	this->_headers["Location"] = "http://localhost:8080/" + directory + new_url;
-	std::ifstream ifs((directory + new_url).c_str());
+	this->_headers["Location"] = "http://localhost:8080" + this->build_resource_path(301); //Change hardcoded host
+	// this->_headers["Location"] = this->_serv.get_host() + ':' + this->_serv.get_port() + this->build_resource_path(301); //smth like that
 	return (301);
 }
 
@@ -243,11 +286,36 @@ std::string	HttpResponse::get_location() {
 	return (location);
 }
 
+/*
+	--
+		This function will return the path to the ressource 
+		that is requested by the client
+	--
+*/
+std::string HttpResponse::build_resource_path(int status) {
+
+	std::string path = this->_req.get_url();
+	if (status == 301)
+	{
+		size_t to_erase = this->get_location().length();
+		path.erase(0, to_erase + 1);
+		path = this->_serv.get_location()[this->get_location()].get_redirection() + path;
+	}
+	else
+		path = '.' + this->_serv.get_location()[this->get_location()].get_directory() + path;
+
+	std::cout << "-- DEBUG --" << std::endl << "path: " << path << std::endl;
+
+	return (path);
+}
+
 void	HttpResponse::simple_response(int code, std::string status) {
 
 	this->_protocol = "HTTP/1.1";
 	this->_status_code = code;
 	this->_status_text = status;
+	this->_response = this->construct_response();
+	this->print();
 }
 
 void	HttpResponse::simple_response(int code, std::string status, std::string path) {
@@ -258,24 +326,69 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	this->_status_code = code;
 	this->_status_text = status;
 
-	if (this->_req.get_method() == "GET")
-		this->handle_get_request();
-	else if (this->_req.get_method() == "POST")
-		this->handle_post_request();
-	else if (this->_req.get_method() == "DELETE")
-		this->handle_delete_request();
+	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
+
+	std::stringstream buff;
+	buff << resource.rdbuf();
+	resource.close();
+	this->_body = buff.str();
+	int body_size = this->_body.length();
+	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+	this->_response = this->construct_response();
+	this->print();
+}
+
+void	HttpResponse::directory_response() {
+
+	std::cout << "directory_response IN" << std::endl;
+	std::string location = this->get_location();
+
+	if (!_serv.get_location()[location].get_default_file().empty())
+	{
+		std::string path = _serv.get_location()[location].get_default_file();
+		return (this->simple_response(200, "OK", path));
+	}
+	if (!_serv.get_location()[location].get_listing())
+		return (this->simple_response(200, "OK"));
+
+	/* --- building 'Index of' HTML page -- */
+
+	std::cout << "directory_response Listing 1" << std::endl;
+	DIR *dp;
+	struct dirent *ep;
+	std::string body;
+
+	dp = opendir (this->build_resource_path(200).c_str());
+	if (dp != NULL)
+	{
+		std::string url = this->_req.get_url();
+		if (url[url.length() - 1] != '/')
+			url += '/';
+		body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + url + "</h1>\n";
+		body = body + "   <p>		______________________________________________________________________________________		</p>\n";
+		body = body + "   </br></br></br>";
+		while ((ep = readdir (dp)))
+		{
+			body = body + "  <a href=\"http://localhost:8080" + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
+			body += '\n';
+		}
+		body += " </body>\n</html>";
+		if ((closedir(dp) == -1))
+			return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
+	}
 	else
-		throw MyException("Exception: Unknown Method detected from request\n");
+		return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
 
-	// this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
+	this->_protocol = "HTTP/1.1";
+	this->_status_code = 200;
+	this->_status_text = "OK";
 
-	// std::stringstream buff;
-	// buff << resource.rdbuf();
-	// resource.close();
-	// this->_body = buff.str();
-	// int body_size = this->_body.length();
-	// this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-	// this->print();
+	this->_headers["Content-Type"] = "text/html; charset=utf-8";
+	this->_body = body;
+	int body_size = this->_body.length();
+	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+	this->_response = this->construct_response();
+	this->print();
 }
 
 void	HttpResponse::handle_get_request()
@@ -320,8 +433,7 @@ void	HttpResponse::handle_get_request()
 		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 		// this->_headers["Content-Length"] = std::to_string(this->_body.length());
 
-		// std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
-		// this->print();
+		this->print();
 	}
 
 }
