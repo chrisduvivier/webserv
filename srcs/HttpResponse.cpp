@@ -40,6 +40,20 @@ int	is_directory(const char *path) {
     return 0;
 }
 
+std::string	get_file_ext(std::string path) {
+
+	std::string extension;
+	size_t pos = path.find('.', 1);
+	if (pos != std::string::npos)
+	{
+		extension = path.substr(pos + 1);
+		pos = extension.find("?");
+		if (pos != std::string::npos)
+			extension = extension.erase(pos, std::string::npos);
+	}
+	return (extension);
+}
+
 void	print_location(Location locations) {
 
 	std::vector<std::string> method = locations.get_method();
@@ -185,30 +199,39 @@ void	HttpResponse::build_response() {
 	if (!ifs && _req.get_method() != "POST")
 		return (this->simple_response(404, "Not Found", error[404]));
 
-	std::string extension;
-	size_t pos = path.find('.', 1);
-	if (pos != std::string::npos)
-	{
-		extension = path.substr(pos + 1);
-		pos = extension.find("?");
-		if (pos != std::string::npos)
-			extension = extension.erase(pos, std::string::npos);
-	}
+	// std::string extension;
+	// size_t pos = path.find('.', 1);
+	// if (pos != std::string::npos)
+	// {
+	// 	extension = path.substr(pos + 1);
+	// 	pos = extension.find("?");
+	// 	if (pos != std::string::npos)
+	// 		extension = extension.erase(pos, std::string::npos);
+	// }
+
+	std::string extension = get_file_ext(path);
 
 	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
 	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
 
-	if (extension == "cgi") //handling CGI
-	{
-		Cgi cgi(this->_req);
-		int ret = cgi.execute_cgi(path);
-		if (ret < 0)
-			return (this->simple_response(500, "Internal Server Error", error[500]));
-		return ; //? simple return if the cgi is called ?
-	}
+	// if (extension == "cgi") //handling CGI
+	// {
+	// 	Cgi cgi(this->_req);
+	// 	int ret = cgi.execute_cgi(path);
+	// 	if (ret < 0)
+	// 		return (this->simple_response(500, "Internal Server Error", error[500]));
+	// 	return ; //? simple return if the cgi is called ?
+	// }
 
 	if ((is_directory(path.c_str())))
 		return (this->directory_response());
+
+	if (_req.get_method() == "GET")
+		return (this->handle_get());
+	else if (_req.get_method() == "POST")
+		return (this->handle_post());
+	else if (_req.get_method() == "DELETE")
+		return (this->handle_delete());
 	return (this->simple_response(200, "OK", path));
 	
 }
@@ -343,186 +366,97 @@ void	HttpResponse::directory_response() {
 	std::cout << "directory_response IN" << std::endl;
 	std::string location = this->get_location();
 
+	if (_serv.get_location()[location].get_listing())
+	{
+		/* --- building 'Index of' HTML page -- */
+
+		std::cout << "directory_response Listing 1" << std::endl;
+		DIR *dp;
+		struct dirent *ep;
+		std::string body;
+
+		dp = opendir (this->build_resource_path(200).c_str());
+		if (dp != NULL)
+		{
+			std::string url = this->_req.get_url();
+			if (url[url.length() - 1] != '/')
+				url += '/';
+			body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + url + "</h1>\n";
+			body = body + "   <p>		______________________________________________________________________________________		</p>\n";
+			body = body + "   </br></br></br>";
+			while ((ep = readdir (dp)))
+			{
+				body = body + "  <a href=\"http://localhost:8080" + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
+				body += '\n';
+			}
+			body += " </body>\n</html>";
+			if ((closedir(dp) == -1))
+				return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
+		}
+		else
+			return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
+
+		this->_protocol = "HTTP/1.1";
+		this->_status_code = 200;
+		this->_status_text = "OK";
+
+		this->_headers["Content-Type"] = "text/html; charset=utf-8";
+		this->_body = body;
+		int body_size = this->_body.length();
+		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+		this->_response = this->construct_response();
+		this->print();
+		return ;
+	}
+
 	if (!_serv.get_location()[location].get_default_file().empty())
 	{
 		std::string path = _serv.get_location()[location].get_default_file();
 		return (this->simple_response(200, "OK", path));
 	}
-	if (!_serv.get_location()[location].get_listing())
-		return (this->simple_response(200, "OK"));
 
-	/* --- building 'Index of' HTML page -- */
-
-	std::cout << "directory_response Listing 1" << std::endl;
-	DIR *dp;
-	struct dirent *ep;
-	std::string body;
-
-	dp = opendir (this->build_resource_path(200).c_str());
-	if (dp != NULL)
-	{
-		std::string url = this->_req.get_url();
-		if (url[url.length() - 1] != '/')
-			url += '/';
-		body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + url + "</h1>\n";
-		body = body + "   <p>		______________________________________________________________________________________		</p>\n";
-		body = body + "   </br></br></br>";
-		while ((ep = readdir (dp)))
-		{
-			body = body + "  <a href=\"http://localhost:8080" + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
-			body += '\n';
-		}
-		body += " </body>\n</html>";
-		if ((closedir(dp) == -1))
-			return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
-	}
-	else
-		return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
-
-	this->_protocol = "HTTP/1.1";
-	this->_status_code = 200;
-	this->_status_text = "OK";
-
-	this->_headers["Content-Type"] = "text/html; charset=utf-8";
-	this->_body = body;
-	int body_size = this->_body.length();
-	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-	this->_response = this->construct_response();
-	this->print();
+	return (this->simple_response(200, "OK"));
 }
 
-void	HttpResponse::handle_get_request()
+void	HttpResponse::handle_get()
 {
-	/* probably going to be a server attribute */
-	std::string directory = "./public_html";
-
-	if (!this->_req.get_url().empty())
-	{
-		/* we build the path to the resource requested */
-		std::string path = directory + this->_req.get_url();
-
-		/* we check if the resource exists - Error 404 if it does not */
-		std::ifstream resource(path.c_str());
-		if (!resource)
-		{
-			this->_protocol = "HTTP/1.1";
-			this->_status_code = 404;
-			this->_status_text = "Not Found";
-			this->_headers["Content-Type"] = "text/html; charset=utf-8";
-			this->_body = "<!DOCTYPE html>\n<html>\n<title>404 Not Found</title>\n<body>\n<div>\n<H1>404 Not Found</H1>\n<p>Unable to find a representation of the requested resource</p>\n</div>\n</body>\n</html>";
-			int body_size = this->_body.length();
-			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-			resource.close();
-
-
-			// getServerConf();
-
-			return ;
-		}
-
-		this->_protocol = "HTTP/1.1";
-		this->_status_code = 200;
-		this->_status_text = "OK";
-		this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
-
-		std::stringstream buff;
-		buff << resource.rdbuf();
-		resource.close();
-		this->_body = buff.str();
-		int body_size = this->_body.length();
-		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-		// this->_headers["Content-Length"] = std::to_string(this->_body.length());
-
-		this->print();
-	}
-
+	//? Do we have to handle parameters after ? in a no cgi GET request
+	return (this->simple_response(200, "OK", this->build_resource_path(200)));
 }
 
-void	HttpResponse::handle_post_request()
+void	HttpResponse::handle_post()
 {
-	std::cout << "HANDLING POST REQUEST" << std::endl;
+	std::string location = this->get_location();
+	std::string upload_path = _serv.get_location()[location].get_upload_path();
+
+	if (upload_path.empty())
+		return (this->simple_response(405, "Uploading file cannot be performed on this location", this->_serv.get_error_pages()[405]));
 	
-	/* probably going to be a server attribute */
-	std::string directory = "./public_html";
-	if (!this->_req.get_url().empty())
-	{
-		/* we build the path to the resource requested */
-		std::string path = directory + this->_req.get_url();
+	if (!is_directory(upload_path.c_str())) //upload on a file might be handle with CGI
+		return (this->simple_response(500, "Internal Server Error", this->_serv.get_error_pages()[500]));
 
-		// check if request is a upload or a cgi request
-		int is_cgi_request = true;	// TODO
-		if (is_cgi_request == true)
-		{
-			std::cout << "+++++++++++++++++++++cgi request's body+++++++++++++++++++\n["  << this->_req.get_body() << "]" << std::endl;
-			Cgi cgi(this->_req);
-			int ret = cgi.execute_cgi(path);
-			if (ret < 0)
-			{
-				// error from execve/CGI
-				std::cerr << "cgi error \n";
-				this->_protocol = "HTTP/1.1";
-				this->_status_code = 500;
-				this->_status_text = "Internal Server Error";
-				// TODO: redirect to 500.html error page?
-				return ;
-			}
+	std::string extension = get_file_ext(this->build_resource_path(200));
+	if (!ContentTypeList().count(extension))
+		return (this->simple_response(415, "Unsupported Media Type", this->_serv.get_error_pages()[415]));
 
-			// complete the response retrieve from the CGI
-			this->_protocol = "HTTP/1.1";
-			this->_status_code = 200;
-			this->_status_text = "OK";
-			this->_body = cgi.get_body();
-			std::cout << "+++++++++++++++++++++cgi body+++++++++++++++++++\n["  << this->_body << "]" << std::endl;
-			int body_size = this->_body.length();
-			this->_headers["Content-Type"] = "text/html";
-			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-		}
-		else
-		{
-			std::cout << "TODO: UPLOAD request\n";
-		}
-	}
-	std::cout << "-----------PRINT RESPONSE TO POST REQ TO CLIENT-----------" << std::endl;
-	this->print();
-	std::cout << "----------------------------------------------------------" << std::endl;
+	//Error concerning size of the body & content length might be checked here
+	std::string file_path = this->build_resource_path(200);
+	size_t pos = file_path.find_last_of('/');
+	file_path = file_path.erase(0, pos);
+	file_path = upload_path + file_path;
+	std::ofstream new_file(file_path);
+	new_file << this->_req.get_body();
+	new_file.close();
+
+	this->_headers["Location"] = file_path;
+	return (this->simple_response(201, "Created"));
 }
 
-void	HttpResponse::handle_delete_request(){
+void	HttpResponse::handle_delete(){
 
-	/* probably going to be a server attribute */
-	std::string directory = "./public_html";
-
-	if (!this->_req.get_url().empty())
-	{
-		/* we build the path to the resource requested */
-		std::string path = directory + this->_req.get_url();
-
-		/* we check if the resource exists - Error 404 if it does not */
-		std::ifstream resource(path.c_str());
-		if (!resource)
-		{
-			this->_protocol = "HTTP/1.1";
-			this->_status_code = 404;
-			this->_status_text = "Not Found";
-			this->_headers["Content-Type"] = "text/html; charset=utf-8";
-			this->_body = "<!DOCTYPE html>\n<html>\n<title>404 Not Found</title>\n<body>\n<div>\n<H1>404 Not Found</H1>\n<p>Unable to find a representation of the requested resource</p>\n</div>\n</body>\n</html>";
-			int body_size = this->_body.length();
-			this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
-			resource.close();
-			return ;
-		}
-		resource.close();
-		this->_protocol = "HTTP/1.1";
-
-		if (std::remove(path.c_str()) == 0)
-		{
-			this->_status_code = 204;
-			this->_status_text = "No Content";
-		}
-		else
-		{
-			this->_status_code = 500;
-			this->_status_text = "Internal Server Error";
-		}
-	}
+	std::string path = this->build_resource_path(200);
+	if (std::remove(path.c_str()) == 0)
+		return (this->simple_response(204, "No Content"));
+	else
+		return (this->simple_response(500, "Internal Server Error", _serv.get_error_pages()[500]));
 }

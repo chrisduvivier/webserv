@@ -56,9 +56,9 @@ class HttpResponse
 
 		std::string	construct_response();
 		void		build_response();
-		void		handle_get_request();
-		void		handle_post_request();
-		void		handle_delete_request();
+		void		handle_get();
+		void		handle_post();
+		void		handle_delete();
 
 		void		print() const;
 		int			check_method();
