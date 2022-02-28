@@ -34,23 +34,9 @@ HttpRequest::HttpRequest(char *buffer)
 		}
 	}
 	// read body
-	if ( this->_headers.find("Content-Length") == this->_headers.end() ) //not found
+	while (std::getline(tmp_string_stream, line))
 	{
-		while (std::getline(tmp_string_stream, line))
-		{
-			// line = line.substr(0, line.size()-1);		// remove the trailing `\r` char
-			this->_body.append(line);
-			// delete[] tmp_buffer;
-		}
-	}
-	else // found
-	{
-		while (std::getline(tmp_string_stream, line))
-		{
-			std::stringstream tmp_content_length(this->_headers["Content-Length"]);
-			this->_body.append(line);
-			// delete[] tmp_buffer;
-		}
+		this->_body.append(line);
 	}
 	
 	std::cout << "------------   PRINTING   ------------\n";
@@ -85,7 +71,9 @@ void	HttpRequest::parse_startline(std::string line)
 	this->_version = line.substr(position);
 }
 
-
+/* 
+**	Read the Headers from HTTP Message. Empty input is rejected. leading space is removed from the value
+*/
 void	HttpRequest::parse_header_line(std::string line)
 {
 	std::string	key = "";
@@ -99,5 +87,8 @@ void	HttpRequest::parse_header_line(std::string line)
     key = line.substr(0, pos_split);
     value = line.substr(pos_split + 1);
 
+	size_t leading_space_pos = value.find(' ');
+	if (leading_space_pos != std::string::npos)
+		value = value.substr(leading_space_pos + 1);
     this->_headers[key] = value;
 }
