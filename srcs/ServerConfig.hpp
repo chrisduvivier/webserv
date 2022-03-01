@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rlinkov <rlinkov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 11:30:54 by ldavids           #+#    #+#             */
-/*   Updated: 2022/02/23 15:39:08 by rlinkov          ###   ########.fr       */
+/*   Updated: 2022/03/01 16:57:22 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,15 @@
 #include <sstream>
 #include <stdlib.h>
 #include <map>
+#include <algorithm>
+
 #include "utils.hpp"
 
+//\\\\\\\\\\\\\\\\\\\\\\/LOCATION/\\\\\\\\\\\\\\\\\\\\\\\//
+//values inside the location scope (config file)
 class Location
 {
-	private : 
+	private :
 		std::vector<std::string>	_method;
 		std::string					_redirection;
 		std::string					_directory;
@@ -32,63 +36,41 @@ class Location
 		std::string					_default_file;
 		std::string					_cgi;
 		std::string					_upload_path;
-		
-	public : 
-		Location() {};
-        Location(std::string    block)
-        {
-            _method = set_vector("method", block);
-            _redirection = set_string("redirection", block);
-            _directory = set_string("directory", block);
-            _default_file = set_string("default", block);
-            _cgi = set_string("cgi", block);
-            _upload_path = set_string("upload_path", block);
-            _listing = set_int("listing", block);
-        }
-		~Location()
-		{
-		}
-			std::vector<std::string>	get_method()
-			{
-				return (_method);
-			}
-			std::string					get_redirection()
-			{
-				return (_redirection);
-			}
-			std::string					get_directory()
-			{
-				return (_directory);
-			}
-			bool						get_listing()
-			{
-				return (_listing);
-			}
-			std::string					get_default_file()
-			{
-				return (_default_file);
-			}
-			std::string					get_cgi()
-			{
-				return (_cgi);
-			}
-			std::string					get_upload_path()
-			{
-				return (_upload_path);
-			}			
+
+		void						check_directives_location(std::string block); // check if directives exist and not redundant
+		std::string					set_string(std::string word, std::string block); // setter + some checks like one parameter only
+		int							set_int(std::string word, std::string block); // setter + some checks like one parameter only + only 1 or 0
+		std::vector<std::string>	set_method(std::string word, std::string block); // setter + some checks (GET - POST - DELETE only)
+		int							check_first_word(std::string word, std::string block); // see if the searched word is a directive or just a parameter
+
+	public :
+		Location();
+		Location(std::string	block);
+		~Location();
+		Location(const Location &src);
+		Location &operator=(const Location &src);
+
+		std::vector<std::string>	get_method();
+		std::string					get_redirection();
+		std::string					get_directory();
+		bool						get_listing();
+		std::string					get_default_file();
+		std::string					get_cgi();
+		std::string					get_upload_path();
 };
 
+//\\\\\\\\\\\\\\\\\\\\/SERVER_CONFIG/\\\\\\\\\\\\\\\\\\\\\//
+//values inside the server scope (config file)
 class ServerConfig
 {
 	private:
 		int										_port;					// one port per server
 		int										_host[4];				// A server configuration can only have one host entry
-															// If the server has to be available on multiple IP addresses, set the host to 0.0.0.0
-		std::string								_host_name;				// Is it usefull?
+																		// If the server has to be available on multiple IP addresses, set the host to 0.0.0.0
+		//std::string							_host_name;				// obsolete, first server is the default one (see subject)
 		std::string								_server_names[50];
 		int										_client_max_body_size;	// in Mb
 		std::map<int, std::string>				_error_pages;			// error_nb linked to their location
-		/*std::map<std::string, std::string>		_location;*/				// first string is the location, second is the block
 		std::map<std::string, Location>			_location;
 		// directives inside block are : method, redirection, directory, listing, default_file, CGI, upload_path
 
@@ -96,7 +78,7 @@ class ServerConfig
 					ServerConfig();
 					~ServerConfig();
 					ServerConfig(const ServerConfig &src);
-	/*Server			&operator=(const Server &src);*/
+	ServerConfig	&operator=(const ServerConfig &src);
 
 	int										get_port();
 	int										*get_host();
@@ -107,7 +89,7 @@ class ServerConfig
 	std::map<std::string, Location>			get_location();
 	void									set_port(int x);
 	void									set_host(int x, int y);
-	void									set_host_name(std::string	name);
+	/*void									set_host_name(std::string	name);*/ //obsolete
 	void									set_server_name(std::string	*names);
 	void									set_client_max_body_size(int x);
 	void									set_error_pages(std::map<int, std::string> temp);

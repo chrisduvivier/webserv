@@ -14,7 +14,7 @@
 
 char*	strcat(std::string s1, std::string s2);
 
-class nullptr_t 
+class nullptr_t
 {
 	public:
 		template<class T>
@@ -29,9 +29,6 @@ class nullptr_t
 		void operator&() const;  // Can't take address of nullptr
 };
 
-int								check_first_word(std::string word, std::string block);
-std::vector<std::string>		set_vector(std::string word, std::string block);
-std::string						set_string(std::string word, std::string block);
-int								set_int(std::string word, std::string block);
+void	error_exit(std::string	error_msg); // used inside ServerConfig and ConfigFile
 
 #endif

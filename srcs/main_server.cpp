@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
 	std::cout << it1->get_port() << std::endl;
 	std::cout << it1->get_server_names()[0] << std::endl;
 	std::cout << it1->get_client_max_body_size() << std::endl;
-	std::cout << it1->get_host_name() << std::endl;
 	std::map<int, std::string>::iterator	it2;
 	std::map<int, std::string>::iterator	it3;
 	std::map<int, std::string>				error_page = it1->get_error_pages();
@@ -65,7 +64,7 @@ int main(int argc, char *argv[])
 		std::cout << "Method = " << *it_method << std::endl;
 		it_method++;
 	}*/
-	
+
     // create a server socket instance and run it
     ServerSocket Server(PORT, INADDR_ANY, AF_INET, SOCK_STREAM, 0);
     try {
