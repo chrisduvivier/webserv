@@ -75,12 +75,12 @@ void	Cgi::set_env()
 	_env[12] = strcat("SERVER_PORT=", 		_SERVER_PORT);
 	_env[13] = strcat("SERVER_SOFTWARE=", 	_SERVER_SOFTWARE);
 	_env[14] = NULL;
-	print_env();
+	// print_env();
 }
 
 void	Cgi::print_env()
 {
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < 14; i++)
 	{
 		std::cerr << "ENV: " << _env[i] << std::endl;
 	}
@@ -111,14 +111,14 @@ int     Cgi::execute_cgi(std::string path_to_cgi)
 		dup2(fd_pipe[1], STDOUT_FILENO);   // [ read end | write end ]
 		if (execve(path_to_cgi.c_str(), NULL, _env) < 0)
 		{
-			std::cout << RED << "Error: CGI EXEC\n" << RESET;
+			std::cerr << RED << "Error: CGI EXEC\n" << RESET;
 			return (-1);
 		}
 		exit(0);
 	}
 	close(fd_pipe[1]);	//close write side
 	
-	waitpid(-1, NULL, 0);
+	// waitpid(-1, NULL, 0);
 
 	int ret = 1;
 	while (ret > 0)

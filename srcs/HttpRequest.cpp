@@ -36,6 +36,7 @@ HttpRequest::HttpRequest(char *buffer)
 	// read body
 	while (std::getline(tmp_string_stream, line))
 	{
+		// line = line.substr(0, line.size()-1);
 		this->_body.append(line);
 	}
 	

@@ -1,39 +1,29 @@
-#!/usr/bin/python -u
+#!/usr/bin/python3 -u
 
-# Import modules for CGI handling 
-import cgi
 import os
-# import cgitb
-# cgitb.enable(display=0, logdir="./tmp")
+import sys
+import urllib.parse
 
-# Create instance of FieldStorage 
-form = cgi.FieldStorage(
-    fp=self.rfile,
-    headers=self.headers,
-    environ={'REQUEST_METHOD':'POST'})
+if os.environ.keys():
+    if os.environ['QUERY_STRING']:
+        query_string = os.environ['QUERY_STRING']
 
-if "name" not in form or "email" not in form:
-    print "<H1>Error</H1>"
-    print "Please fill in the name and email fields."
-    print "Content-type: text/html\r\n\r\n"
-    print "<font size=+1>Environment</font><\br>"
-    for param in os.environ.keys():
-        print "<b>%20s</b>: %s<\br>" % (param, os.environ[param])
+multiform = None
+if query_string:
+    multiform = urllib.parse.parse_qs(query_string)
+
+print("Content-Type:text/html; charset=utf-8\r\n\r\n")
+print('<html>')
+print('<head>')
+print('<title>Hello World - First CGI Program</title>')
+print('</head>')
+print('<body>')
+print('<h2>Hello World! This is my first CGI program</h2>')
+if query_string and multiform and multiform.keys():
+    print('<h2> List of the FORM DATA passed to CGI <\h2>')
+    for key in multiform.keys():
+        print('<p>' + key + '=' + str(multiform[key]) + '</p>')
 else:
-    for param in os.environ.keys():
-        print "<b>%20s</b>: %s<\br>" % (param, os.environ[param])
-    
-    # Get data from fields
-    name = form.getvalue('name')
-    email  = form.getvalue('email')
-
-    # print "Content-type:text/html\r\n\r\n"
-    print "<html>"
-    print "<head>"
-    print "<title>Hello - Second CGI Program</title>"
-    print "</head>"
-    print "<body>"
-    print "<h1> Test </h1>"
-    print "<h2>Hello %s %s</h2>" % (name, email)
-    print "</body>"
-    print "</html>"
+    print('<h2> FORM DATA passed to CGI was empty! <\h2>')
+print('</body>')
+print('</html>')

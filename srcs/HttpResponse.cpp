@@ -204,21 +204,18 @@ void	HttpResponse::build_response() {
 	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
 	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
 
-	if (extension == "cgi") //handling CGI
+	if (extension == "cgi" && this->_req.get_method() == "POST") //handling CGI
 	{
 		Cgi cgi(this->_req);
 		int ret = cgi.execute_cgi(path);
 		if (ret < 0)
 			return (this->simple_response(500, "Internal Server Error", error[500]));
-		
-		this->_protocol = "HTTP/1.1";
-		this->_status_code = code;
-		this->_status_text = "OK";
 		this->_body = cgi.get_body();	//read cgi execution's output
+		// header is added here manually for now
+		this->_headers["Content-Type"] = "text/html; charset=utf-8";
 		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << this->_body.length()) )->str();
-		this->_response = this->construct_response();
-		this->print();
-		return ; //? simple return if the cgi is called ?
+		std::cout << "EXECVE : FINISH! => body=[" << this->_body << "]\n\n";
+		return (this->simple_response(200, "OK"));
 	}
 
 	if ((is_directory(path.c_str())))
