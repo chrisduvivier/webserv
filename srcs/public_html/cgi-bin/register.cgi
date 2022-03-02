@@ -4,7 +4,7 @@ import os
 import sys
 import urllib.parse
 
-simpleform = None
+multiform = None
 query_string = None
 
 if os.environ.keys():
@@ -21,20 +21,20 @@ if os.environ.keys():
 	# 		query_string = os.environ['QUERY_STRING']
 
 if query_string:
-	simpleform = urllib.parse.parse_qs(query_string)
+	multiform = urllib.parse.parse_qs(query_string)
 
 # print("Content-Type:text/html; charset=utf-8\r\n\r\n")
 print('<html>')
 print('<head>')
-print('<title>Simple Form OUTPUT</title>')
+print('<title>Received Mailing list</title>')
 print('</head>')
 print('<body>')
-print('<h2>We accepted your form!</h2>')
-if query_string and simpleform and simpleform.keys():
+print('<h2>Hello World! This is my CGI program reading the user data</h2>')
+if query_string and multiform and multiform.keys():
 	print('<h3> List of the FORM DATA passed to CGI </h3>')
-	for key in simpleform.keys():
-		print('<p>' + "Your favorite game is" + ': ' + str(simpleform[key]) + '</p>')
+	for key in multiform.keys():
+		print('<p>' + key + '=' + str(multiform[key]) + '</p>')
 else:
-	print('<h3> ...But the form was empty! Please submit some input in the form!  </h3>')
+	print('<h3> FORM DATA passed to CGI was empty! <\h3>')
 print('</body>')
 print('</html>')

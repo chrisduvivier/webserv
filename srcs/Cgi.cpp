@@ -12,24 +12,24 @@ Cgi::Cgi(HttpRequest request)
 
 void    Cgi::init_var()
 {
-	_CONTENT_LENGTH = "";
-	_GATEWAY_INTERFACE = "CGI/1.1";
-	_PATH_INFO = "";
-	_PATH_TRANSLATED = "";
-	_QUERY_STRING = "";
-	_REMOTE_ADDR = "";
-	_REMOTE_USER = "";
-	_REQUEST_METHOD = "";
-	_SCRIPT_FILENAME = "";
-	_SCRIPT_NAME = "";
-	_SERVER_NAME = "";
-	_SERVER_PROTOCOL = "HTTP/1.1";
-	_SERVER_PORT = "";
-	_SERVER_SOFTWARE = "";
-	// _REDIRECT_STATUS = "";
-	_body = "";
-	_error = false;
-	_env[0] = NULL;
+	_CONTENT_LENGTH = 		"";
+	_GATEWAY_INTERFACE = 	"CGI/1.1";
+	_PATH_INFO = 			"";
+	_PATH_TRANSLATED = 		"";
+	_QUERY_STRING = 		"";
+	_REMOTE_ADDR = 			"";
+	_REMOTE_USER = 			"";
+	_REQUEST_METHOD = 		"";
+	_SCRIPT_FILENAME = 		"";
+	_SCRIPT_NAME = 			"";
+	_SERVER_NAME = 			"";
+	_SERVER_PROTOCOL = 		"HTTP/1.1";
+	_SERVER_PORT = 			"";
+	_SERVER_SOFTWARE = 		"";
+	// _REDIRECT_STATUS = 		"";
+	_body = 				"";
+	_error = 				false;
+	_env[0] = 				NULL;
 }
 
 void    Cgi::set_var(HttpRequest request)

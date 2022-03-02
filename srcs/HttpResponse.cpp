@@ -204,7 +204,7 @@ void	HttpResponse::build_response() {
 	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
 	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
 
-	if (extension == "cgi" && this->_req.get_method() == "POST") //handling CGI
+	if (extension == "cgi" && (this->_req.get_method() == "POST" || this->_req.get_method() == "GET" )) //handling CGI
 	{
 		Cgi cgi(this->_req);
 		int ret = cgi.execute_cgi(path);
