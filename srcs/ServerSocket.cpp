@@ -43,7 +43,6 @@ int	handle_connection(int client_sock)
 		throw MyException("Exception: Couldn't read from client socket");
 
 	HttpRequest client_http_request(buffer);
-	
 	HttpResponse http_response(client_http_request);
 	http_response.build_response();
 	response = http_response.get_response();

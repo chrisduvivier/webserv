@@ -192,7 +192,7 @@ void	HttpResponse::build_response() {
 	case 501:
 		return (this->simple_response(501, "Not Implemented", error[501]));
 	}
-	
+
 	std::string path = this->build_resource_path(code);
 
 	std::ifstream ifs(path.c_str());
@@ -203,8 +203,8 @@ void	HttpResponse::build_response() {
 
 	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
 	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
-
-	if (extension == "cgi" && (this->_req.get_method() == "POST" || this->_req.get_method() == "GET" )) //handling CGI
+	
+	if (extension == "cgi") //handling CGI
 	{
 		Cgi cgi(this->_req);
 		int ret = cgi.execute_cgi(path);

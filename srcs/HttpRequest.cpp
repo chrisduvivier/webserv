@@ -39,6 +39,8 @@ HttpRequest::HttpRequest(char *buffer)
 		// line = line.substr(0, line.size()-1);
 		this->_body.append(line);
 	}
+
+	this->parse_url(this->get_url());
 	
 	std::cout << "------------   PRINTING   ------------\n";
 	this->print();
@@ -48,6 +50,7 @@ HttpRequest::HttpRequest(char *buffer)
 void	HttpRequest::print() const
 {
 	std::cout << "method: " << this->get_method() << "\nurl: " << this->get_url() << "\nversion: " << this->get_version() << std::endl;
+	std::cout << "query_string: " << this->get_query_string() << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
     	std::cout << it->first << ": " << it->second << '\n';
 	std::cout << "BODY: \n[" << this->_body << "]\n";
@@ -92,4 +95,21 @@ void	HttpRequest::parse_header_line(std::string line)
 	if (leading_space_pos != std::string::npos)
 		value = value.substr(leading_space_pos + 1);
     this->_headers[key] = value;
+}
+
+void	HttpRequest::parse_url(std::string url)
+{
+	std::string	new_url = "";
+    std::string	query_string = "";
+
+    if (url.size() == 0) return;
+
+    int pos_split = url.find("?", 0); //Look for separator '?'
+	if (pos_split == -1) return ;
+
+    new_url = url.substr(0, pos_split);
+    query_string = url.substr(pos_split + 1);
+	
+	this->_url = new_url;
+	this->_query_string = query_string;
 }

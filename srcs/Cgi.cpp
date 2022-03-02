@@ -49,11 +49,9 @@ void    Cgi::set_var(HttpRequest request)
 	_SCRIPT_NAME = request.get_url();
 	_PATH_TRANSLATED = (full_path + request.get_url()).c_str();
 	_QUERY_STRING = request.get_body();
-	// std::string referer = request.get_arg_method();
-	// if (referer.find('?') != std::string::npos)
-	// {
-		// _QUERY_STRING = referer.substr(referer.find('?') + 1);
-	// }
+	if (request.get_method() == "GET")
+		_QUERY_STRING = request.get_query_string();
+		std::cout << "ENV[_QUERY_STRING] = " << _QUERY_STRING << std::endl;
 	_SERVER_NAME = "http://localhost";  //TODO: get from server config
 	// _REDIRECT_STATUS =  "200";
 }
@@ -118,7 +116,7 @@ int     Cgi::execute_cgi(std::string path_to_cgi)
 	}
 	close(fd_pipe[1]);	//close write side
 	
-	// waitpid(-1, NULL, 0);
+	waitpid(-1, NULL, 0);
 
 	int ret = 1;
 	while (ret > 0)

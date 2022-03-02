@@ -42,6 +42,8 @@ class HttpRequest
 
 		void	parse_startline(std::string	one_line);
 		void	parse_header_line(std::string line);
+		void	parse_url(std::string url);
+		
 		void	print() const;
 
 		const std::string							get_method() const { return _method; };
@@ -49,6 +51,7 @@ class HttpRequest
 		const std::string							get_version() const { return _version; };
 		const std::map<std::string, std::string>	get_headers() const { return _headers; };
 		const std::string							get_body() const { return _body; };
+		const std::string							get_query_string() const { return _query_string; };
 		
 	private:
 		std::string                                     _method;
@@ -56,6 +59,7 @@ class HttpRequest
 		std::string                                     _version;
 		std::map<std::string, std::string>   			_headers;
 		std::string										_body;
+		std::string										_query_string;
 };
 
 #endif
