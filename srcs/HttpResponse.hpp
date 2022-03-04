@@ -63,8 +63,10 @@ class HttpResponse
 		void		print() const;
 		int			check_method();
 		int			check_redirection();
+		int			check_max_body_size();
+		int			check_url_exists();
 		std::string	get_location();
-		std::string build_ressource_path(int status);
+		std::string build_ressource_path();
 		void		simple_response(int code, std::string status);
 		void		simple_response(int code, std::string status, std::string path);
 		void		directory_response();

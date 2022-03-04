@@ -1,7 +1,6 @@
 #include "HttpResponse.hpp"
 
 												/* ---- UTILS FUNCTIONS ---- */
-
 /*
 	--
 		This function returns a map that contains ressources extension that are supported on the server as key
@@ -20,18 +19,11 @@ std::map<std::string, std::string> ContentTypeList(){
 	contentType["webp"] = "image/webp";
 	contentType["ico"] = "image/vnd.microsoft.icon";
 	contentType["cgi"] = "cgi";
-
 	return (contentType);
 }
 
-/*
-	--
-		Checks if the path given as parameter leads to a directory
-	--
-*/
 int	is_directory(const char *path) {
 
-	std::cout << "is_directory IN" << std::endl;
 	struct stat stats;
 
     stat(path, &stats);
@@ -54,68 +46,14 @@ std::string	get_file_ext(std::string path) {
 	return (extension);
 }
 
-void	print_location(Location locations) {
-
-	std::vector<std::string> method = locations.get_method();
-	std::cout << "		method      :";
-	for (std::vector<std::string>::iterator i = method.begin(); i < method.end(); ++i)
-	{
-		std::cout << " " << *i;
-	}
-	std::cout << std::endl << "		redirection : " << locations.get_redirection() <<std::endl;
-	std::cout << "		directory   : " << locations.get_directory() <<std::endl;
-	std::cout << "		listing     : " << locations.get_listing() <<std::endl;
-	std::cout << "		default file: " << locations.get_default_file() <<std::endl;
-	std::cout << "		cgi         : " << locations.get_cgi() <<std::endl;
-	std::cout << "		upload path : " << locations.get_upload_path() <<std::endl;
-	
-
-}
-/* --- Should be pass to the HttpResponse, this function is only for tests purpose --- */
-
-// ServerConfig getServerConf() {
-// 	ConfigFile conf("./conf/default.conf");
-// 	ServerConfig servConf = conf.populate(0);
-
-// 	{							/* --- display conf --- */
-// 		// std::cout << "PORT : " <<  servConf.get_port() << std::endl;
-// 		// std::cout << "HOST : " << servConf.get_host() << std::endl;
-// 		// std::cout << "HOST NAME : " << servConf.get_host_name() << std::endl;
-// 		// for (size_t i = 0; i < 50; i++)
-// 		// {
-// 		// 	if (!servConf.get_server_names()[i].empty())
-// 		// 		std::cout << "SERVER NAME[" << i << "] : " << servConf.get_server_names()[i] << std::endl;
-// 		// }
-// 		// std::cout << "CLIENT MAX BODY SIZE : " << servConf.get_client_max_body_size() << std::endl;
-
-// 		// std::map<int, std::string> error_page = servConf.get_error_pages();
-// 		// for (std::map<int, std::string>::iterator it = error_page.begin(); it != error_page.end(); ++it)
-// 		// 	std::cout << "[INFO] ERROR-CODE: " << it->first << "-> location: " << it->second << std::endl;
-
-// 		// std::map<std::string, Location> location = servConf.get_location();
-// 		// std::cout << "LOCATIONS : " << std::endl;
-// 		// for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); ++it)
-// 		// {
-// 		// 	// std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
-// 		// 	std::cout << "	location : " << it->first << std::endl;
-// 		// 	print_location(it->second);
-// 		// }
-// 	}							/* -- display conf end ---*/
-	
-// 	return (servConf);
-// }
-
 												/* ---- CLASS FUNCTIONS ---- */
-
 
 HttpResponse::HttpResponse() : _protocol("HTTP/1.1") {}
 
 HttpResponse::HttpResponse(HttpRequest request, ServerConfig serv) : _protocol("HTTP/1.1") {
 	
-	//remove comment when ServConfig will be passed to build HttpResponse in serverSocket
 	this->_req = request;
 	this->_serv = serv;
-	// this->_serv = getServerConf();
 }
 
 
@@ -139,27 +77,20 @@ std::string	HttpResponse::construct_response() {
 
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it) // add Headers
     	tmp << it->first << ": " << it->second << "\r\n";
-	
-	tmp << "\r\n" << this->_body; // add delimiter between headers and body. 
 
+	tmp << "\r\n" << this->_body; // add delimiter between headers and body. 
 	response = tmp.str();
 	return (response);
 }
 
-/*
-	--
-		This function prints the response that will be sent to the client
-	--
-*/
 void	HttpResponse::print() const {
 
-	std::cout << "-----------PRINT RESPONSE TO CLIENT-----------" << std::endl;
+	std::cout << "----- HttpResponse: _response -----" << std::endl;
 	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
 	for(std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 	std::cout << std::endl;
-	
-	// std::cout << this->_body << std::endl;
+	/*std::cout << this->_body << std::endl;*/
 }
 
 /*
@@ -170,14 +101,9 @@ void	HttpResponse::print() const {
 */
 void	HttpResponse::build_response() {
 
-	//Changes have to be made in check_redirection to make a proper Location (remove ./)
-	//changes in Location ? or in code ? Or maybe write public_html instead of ./public_html ?
-
+	std::map<int, std::string> error = _serv.get_error_pages();
 
 	int code = this->check_method();
-	if (code == 200)
-		code = this->check_redirection();
-	std::map<int, std::string> error = _serv.get_error_pages();
 	switch(code) {
 	case 301:
 		return (this->simple_response(301, "Moved Permanently"));
@@ -195,17 +121,9 @@ void	HttpResponse::build_response() {
 		return (this->simple_response(501, "Not Implemented", error[501]));
 	}
 
-	std::string path = this->build_ressource_path(code);
-
-	std::ifstream ifs(path.c_str());
-	if (!ifs && _req.get_method() != "POST")
-		return (this->simple_response(404, "Not Found", error[404]));
-
+	std::string path = this->build_ressource_path();
 	std::string extension = get_file_ext(path);
 
-	// if (!ContentTypeList().count(extension)) // WIP --- really necessary ???
-	// 	return (this->simple_response(415, "Unsupported Media Type", error[415]));
-	
 	if (extension == "cgi") //handling CGI
 	{
 		Cgi cgi(this->_req);
@@ -230,7 +148,6 @@ void	HttpResponse::build_response() {
 	else if (_req.get_method() == "DELETE")
 		return (this->handle_delete());
 	return (this->simple_response(200, "OK", path));
-	
 }
 
 /*
@@ -249,9 +166,7 @@ int	HttpResponse::check_method() {
 	std::map<std::string, std::string> headers = _req.get_headers();
 	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
 		return (400);
-	size_t client_max_size = (size_t)this->_serv.get_client_max_body_size();
-	if (client_max_size != 0 && client_max_size < this->_req.get_body().length())
-		return (413);
+
 	std::string location = this->get_location();
 	std::vector<std::string> allowed_method;
 	allowed_method = _serv.get_location()[location].get_method();
@@ -267,7 +182,7 @@ int	HttpResponse::check_method() {
 		this->_headers["Allow"] = allow;
 		return (405);
 	}
-	return (200);
+	return (this->check_redirection());
 }
 
 /*
@@ -280,11 +195,39 @@ int	HttpResponse::check_redirection() {
 	
 	std::string location = this->get_location();
 	if (this->_serv.get_location()[location].get_redirection().empty())
-		return (200);
+		return (this->check_max_body_size());
 	
-	this->_headers["Location"] = "http://localhost:8080" + this->build_ressource_path(301); //Change hardcoded host
+	this->_headers["Location"] = "http://localhost:8080" + this->build_ressource_path(); //Change hardcoded host
 	// this->_headers["Location"] = this->_serv.get_host() + ':' + this->_serv.get_port() + this->build_resource_path(301); //smth like that
 	return (301);
+}
+
+/*
+	--
+		This function will verify the request body does not exceed the size specified in the conf file
+	--
+*/
+int	HttpResponse::check_max_body_size() {
+
+	size_t client_max_size = (size_t)this->_serv.get_client_max_body_size();
+	if (client_max_size != 0 && client_max_size < this->_req.get_body().length())
+		return (413);
+	return (this->check_url_exists());
+}
+
+/*
+	--
+		This function will verify that the ressource requested exists
+	--
+*/
+int	HttpResponse::check_url_exists() {
+
+	std::string path = this->build_ressource_path();
+
+	std::ifstream ifs(path.c_str());
+	if (!ifs && _req.get_method() != "POST")
+		return (404);
+	return (200);
 }
 
 /*
@@ -298,7 +241,7 @@ std::string	HttpResponse::get_location() {
 	std::string location = this->_req.get_url();
 	std::map<std::string, Location> conf_location = this->_serv.get_location();
 
-	while (!conf_location.count(location)) //check if map contains location as key
+	while (!conf_location.count(location))
 	{
 		size_t pos = location.find_last_of("/");
 		if (pos)
@@ -306,7 +249,6 @@ std::string	HttpResponse::get_location() {
 		else
 			location = location.substr(0, pos + 1);
 	}
-	// std::cout << "-- DEBUG --" << std::endl << "location: " << location << std::endl;
 	return (location);
 }
 
@@ -316,10 +258,11 @@ std::string	HttpResponse::get_location() {
 		that is requested by the client
 	--
 */
-std::string HttpResponse::build_ressource_path(int status) {
+std::string HttpResponse::build_ressource_path() {
 
 	std::string path = this->_req.get_url();
-	if (status == 301)
+	std::string location = this->get_location();
+	if (!this->_serv.get_location()[location].get_redirection().empty())
 	{
 		size_t to_erase = this->get_location().length();
 		path.erase(0, to_erase + 1);
@@ -327,9 +270,6 @@ std::string HttpResponse::build_ressource_path(int status) {
 	}
 	else
 		path = '.' + this->_serv.get_location()[this->get_location()].get_directory() + path;
-
-	std::cout << "-- DEBUG --" << std::endl << "path: " << path << std::endl;
-
 	return (path);
 }
 
@@ -339,7 +279,6 @@ void	HttpResponse::simple_response(int code, std::string status) {
 	this->_status_code = code;
 	this->_status_text = status;
 	this->_response = this->construct_response();
-	this->print();
 }
 
 void	HttpResponse::simple_response(int code, std::string status, std::string path) {
@@ -351,7 +290,6 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	this->_status_text = status;
 
 	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
-
 	std::stringstream buff;
 	buff << resource.rdbuf();
 	resource.close();
@@ -359,7 +297,6 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	int body_size = this->_body.length();
 	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 	this->_response = this->construct_response();
-	this->print();
 }
 
 void	HttpResponse::directory_response() {
@@ -376,7 +313,7 @@ void	HttpResponse::directory_response() {
 		struct dirent *ep;
 		std::string body;
 
-		dp = opendir (this->build_ressource_path(200).c_str());
+		dp = opendir (this->build_ressource_path().c_str());
 		if (dp != NULL)
 		{
 			std::string url = this->_req.get_url();
@@ -400,13 +337,11 @@ void	HttpResponse::directory_response() {
 		this->_protocol = "HTTP/1.1";
 		this->_status_code = 200;
 		this->_status_text = "OK";
-
 		this->_headers["Content-Type"] = "text/html; charset=utf-8";
 		this->_body = body;
 		int body_size = this->_body.length();
 		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
 		this->_response = this->construct_response();
-		this->print();
 		return ;
 	}
 
@@ -415,14 +350,12 @@ void	HttpResponse::directory_response() {
 		std::string path = _serv.get_location()[location].get_default_file();
 		return (this->simple_response(200, "OK", path));
 	}
-
 	return (this->simple_response(200, "OK"));
 }
 
 void	HttpResponse::handle_get()
 {
-	//? Do we have to handle parameters after ? in a no cgi GET request
-	return (this->simple_response(200, "OK", this->build_ressource_path(200)));
+	return (this->simple_response(200, "OK", this->build_ressource_path()));
 }
 
 void	HttpResponse::handle_post()
@@ -433,15 +366,14 @@ void	HttpResponse::handle_post()
 	if (upload_path.empty())
 		return (this->simple_response(405, "Uploading file cannot be performed on this location", this->_serv.get_error_pages()[405]));
 	
-	if (!is_directory(upload_path.c_str())) //upload on a file might be handle with CGI
+	if (!is_directory(upload_path.c_str()))
 		return (this->simple_response(500, "Internal Server Error", this->_serv.get_error_pages()[500]));
 
-	std::string extension = get_file_ext(this->build_ressource_path(200));
+	std::string extension = get_file_ext(this->build_ressource_path());
 	if (!ContentTypeList().count(extension))
 		return (this->simple_response(415, "Unsupported Media Type", this->_serv.get_error_pages()[415]));
 
-	//Error concerning size of the body & content length might be checked here
-	std::string file_path = this->build_ressource_path(200);
+	std::string file_path = this->build_ressource_path();
 	size_t pos = file_path.find_last_of('/');
 	file_path = file_path.erase(0, pos);
 	file_path = upload_path + file_path;
@@ -455,7 +387,7 @@ void	HttpResponse::handle_post()
 
 void	HttpResponse::handle_delete(){
 
-	std::string path = this->build_ressource_path(200);
+	std::string path = this->build_ressource_path();
 	if (std::remove(path.c_str()) == 0)
 		return (this->simple_response(204, "No Content"));
 	else
