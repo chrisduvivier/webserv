@@ -141,12 +141,11 @@ void	HttpResponse::build_response() {
 	if ((is_directory(path.c_str())))
 		return (this->directory_response());
 
-	if (_req.get_method() == "GET")
-		return (this->handle_get());
-	else if (_req.get_method() == "POST")
+	if (_req.get_method() == "POST")
 		return (this->handle_post());
 	else if (_req.get_method() == "DELETE")
 		return (this->handle_delete());
+	
 	return (this->simple_response(200, "OK", path));
 }
 
@@ -351,11 +350,6 @@ void	HttpResponse::directory_response() {
 		return (this->simple_response(200, "OK", path));
 	}
 	return (this->simple_response(200, "OK"));
-}
-
-void	HttpResponse::handle_get()
-{
-	return (this->simple_response(200, "OK", this->build_ressource_path()));
 }
 
 void	HttpResponse::handle_post()
