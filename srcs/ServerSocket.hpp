@@ -24,6 +24,8 @@
 # include "HttpResponse.hpp"
 # include "MyException.hpp"
 
+# include "ServerConfig.hpp"
+
 # define REQUEST_READ_BUFFER  10256
 
 class ServerSocket : public SimpleSocket
@@ -35,6 +37,10 @@ class ServerSocket : public SimpleSocket
 		// throw exception on error
 		void    init();
 		int		run();
+		void	setConf(ServerConfig conf);
+
+	private:
+		ServerConfig _conf;
 };
 
 #endif

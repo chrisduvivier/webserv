@@ -73,49 +73,49 @@ void	print_location(Location locations) {
 }
 /* --- Should be pass to the HttpResponse, this function is only for tests purpose --- */
 
-ServerConfig getServerConf() {
-	ConfigFile conf("./conf/default.conf");
-	ServerConfig servConf = conf.populate(0);
+// ServerConfig getServerConf() {
+// 	ConfigFile conf("./conf/default.conf");
+// 	ServerConfig servConf = conf.populate(0);
 
-	{							/* --- display conf --- */
-		// std::cout << "PORT : " <<  servConf.get_port() << std::endl;
-		// std::cout << "HOST : " << servConf.get_host() << std::endl;
-		// std::cout << "HOST NAME : " << servConf.get_host_name() << std::endl;
-		// for (size_t i = 0; i < 50; i++)
-		// {
-		// 	if (!servConf.get_server_names()[i].empty())
-		// 		std::cout << "SERVER NAME[" << i << "] : " << servConf.get_server_names()[i] << std::endl;
-		// }
-		// std::cout << "CLIENT MAX BODY SIZE : " << servConf.get_client_max_body_size() << std::endl;
+// 	{							/* --- display conf --- */
+// 		// std::cout << "PORT : " <<  servConf.get_port() << std::endl;
+// 		// std::cout << "HOST : " << servConf.get_host() << std::endl;
+// 		// std::cout << "HOST NAME : " << servConf.get_host_name() << std::endl;
+// 		// for (size_t i = 0; i < 50; i++)
+// 		// {
+// 		// 	if (!servConf.get_server_names()[i].empty())
+// 		// 		std::cout << "SERVER NAME[" << i << "] : " << servConf.get_server_names()[i] << std::endl;
+// 		// }
+// 		// std::cout << "CLIENT MAX BODY SIZE : " << servConf.get_client_max_body_size() << std::endl;
 
-		// std::map<int, std::string> error_page = servConf.get_error_pages();
-		// for (std::map<int, std::string>::iterator it = error_page.begin(); it != error_page.end(); ++it)
-		// 	std::cout << "[INFO] ERROR-CODE: " << it->first << "-> location: " << it->second << std::endl;
+// 		// std::map<int, std::string> error_page = servConf.get_error_pages();
+// 		// for (std::map<int, std::string>::iterator it = error_page.begin(); it != error_page.end(); ++it)
+// 		// 	std::cout << "[INFO] ERROR-CODE: " << it->first << "-> location: " << it->second << std::endl;
 
-		// std::map<std::string, Location> location = servConf.get_location();
-		// std::cout << "LOCATIONS : " << std::endl;
-		// for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); ++it)
-		// {
-		// 	// std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
-		// 	std::cout << "	location : " << it->first << std::endl;
-		// 	print_location(it->second);
-		// }
-	}							/* -- display conf end ---*/
+// 		// std::map<std::string, Location> location = servConf.get_location();
+// 		// std::cout << "LOCATIONS : " << std::endl;
+// 		// for (std::map<std::string, Location>::iterator it = location.begin(); it != location.end(); ++it)
+// 		// {
+// 		// 	// std::cout << "LOCATIONS : " << it->first << " | " << it->second.get_directory() << std::endl;
+// 		// 	std::cout << "	location : " << it->first << std::endl;
+// 		// 	print_location(it->second);
+// 		// }
+// 	}							/* -- display conf end ---*/
 	
-	return (servConf);
-}
+// 	return (servConf);
+// }
 
 												/* ---- CLASS FUNCTIONS ---- */
 
 
 HttpResponse::HttpResponse() : _protocol("HTTP/1.1") {}
 
-HttpResponse::HttpResponse(HttpRequest request/*, ServerConfig serv*/) : _protocol("HTTP/1.1") {
+HttpResponse::HttpResponse(HttpRequest request, ServerConfig serv) : _protocol("HTTP/1.1") {
 	
 	//remove comment when ServConfig will be passed to build HttpResponse in serverSocket
 	this->_req = request;
-	//this->_serv = serv;
-	this->_serv = getServerConf();
+	this->_serv = serv;
+	// this->_serv = getServerConf();
 }
 
 
@@ -249,7 +249,7 @@ int	HttpResponse::check_method() {
 	std::map<std::string, std::string> headers = _req.get_headers();
 	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
 		return (400);
-	if (method == "POST" && (this->_serv.get_client_max_body_size() < this->_req.get_body().length()))
+	if (method == "POST" && ((size_t)this->_serv.get_client_max_body_size() < this->_req.get_body().length()))
 		return (413);
 	std::string location = this->get_location();
 	std::vector<std::string> allowed_method;

@@ -30,7 +30,7 @@ class HttpResponse
 	public:
 
 		HttpResponse();
-		HttpResponse(HttpRequest request /*, ServerConfig serv */);
+		HttpResponse(HttpRequest request , ServerConfig serv);
 		// ~HttpResponse();
 
 		HttpResponse (const HttpResponse &copy) 

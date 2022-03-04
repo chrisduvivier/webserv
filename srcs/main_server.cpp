@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
 
     // create a server socket instance and run it
     ServerSocket Server(PORT, INADDR_ANY, AF_INET, SOCK_STREAM, 0);
+	Server.setConf(conf_file.populate(0));
     try {
         Server.init();
     } catch (std::exception& e) {

@@ -17,9 +17,19 @@ void    ServerSocket::init()
 }
 
 /*
+	--
+		Associate a configuration file to the server
+	--
+*/
+void	ServerSocket::setConf(ServerConfig conf) {
+
+	this->_conf = conf;
+}
+
+/*
 **	Read the request and handle appropriate result
 */
-int	handle_connection(int client_sock)
+int	handle_connection(int client_sock, ServerConfig conf)
 {
 	int		ret = 0;
 	static int	request_number = 0;
@@ -43,7 +53,7 @@ int	handle_connection(int client_sock)
 		throw MyException("Exception: Couldn't read from client socket");
 
 	HttpRequest client_http_request(buffer);
-	HttpResponse http_response(client_http_request);
+	HttpResponse http_response(client_http_request, conf);
 	http_response.build_response();
 	response = http_response.get_response();
 
@@ -111,7 +121,7 @@ int ServerSocket::run()
 				else
 				{
 					try {
-						handle_connection(i);
+						handle_connection(i, _conf);
 					} catch (std::exception &e) {
 						std::cout << e.what() << std::endl;
 					}
