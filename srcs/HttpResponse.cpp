@@ -250,7 +250,7 @@ int	HttpResponse::check_method() {
 	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
 		return (400);
 	size_t client_max_size = (size_t)this->_serv.get_client_max_body_size();
-	if (client_max_size < this->_req.get_body().length() && client_max_size != 0)
+	if (client_max_size != 0 && client_max_size < this->_req.get_body().length())
 		return (413);
 	std::string location = this->get_location();
 	std::vector<std::string> allowed_method;
