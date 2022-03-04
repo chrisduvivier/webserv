@@ -187,13 +187,15 @@ void	HttpResponse::build_response() {
 		return (this->simple_response(404, "Not Found", error[404]));
 	case 405:
 		return (this->simple_response(405, "Not Allowed", error[405]));
+	case 413:
+		return (this->simple_response(413, "Payload Too Large", error[413]));
 	case 500:
 		return (this->simple_response(500, "Internal Server Error", error[500]));
 	case 501:
 		return (this->simple_response(501, "Not Implemented", error[501]));
 	}
 
-	std::string path = this->build_resource_path(code);
+	std::string path = this->build_ressource_path(code);
 
 	std::ifstream ifs(path.c_str());
 	if (!ifs && _req.get_method() != "POST")
@@ -239,6 +241,7 @@ void	HttpResponse::build_response() {
 	--
 */
 int	HttpResponse::check_method() {
+
 	std::string method = _req.get_method();
 	if (method != "POST" && method != "GET" && method != "DELETE")
 		return (501);
@@ -246,6 +249,8 @@ int	HttpResponse::check_method() {
 	std::map<std::string, std::string> headers = _req.get_headers();
 	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
 		return (400);
+	if (method == "POST" && (this->_serv.get_client_max_body_size() < this->_req.get_body().length()))
+		return (413);
 	std::string location = this->get_location();
 	std::vector<std::string> allowed_method;
 	allowed_method = _serv.get_location()[location].get_method();
@@ -276,7 +281,7 @@ int	HttpResponse::check_redirection() {
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (200);
 	
-	this->_headers["Location"] = "http://localhost:8080" + this->build_resource_path(301); //Change hardcoded host
+	this->_headers["Location"] = "http://localhost:8080" + this->build_ressource_path(301); //Change hardcoded host
 	// this->_headers["Location"] = this->_serv.get_host() + ':' + this->_serv.get_port() + this->build_resource_path(301); //smth like that
 	return (301);
 }
@@ -310,7 +315,7 @@ std::string	HttpResponse::get_location() {
 		that is requested by the client
 	--
 */
-std::string HttpResponse::build_resource_path(int status) {
+std::string HttpResponse::build_ressource_path(int status) {
 
 	std::string path = this->_req.get_url();
 	if (status == 301)
@@ -370,7 +375,7 @@ void	HttpResponse::directory_response() {
 		struct dirent *ep;
 		std::string body;
 
-		dp = opendir (this->build_resource_path(200).c_str());
+		dp = opendir (this->build_ressource_path(200).c_str());
 		if (dp != NULL)
 		{
 			std::string url = this->_req.get_url();
@@ -416,7 +421,7 @@ void	HttpResponse::directory_response() {
 void	HttpResponse::handle_get()
 {
 	//? Do we have to handle parameters after ? in a no cgi GET request
-	return (this->simple_response(200, "OK", this->build_resource_path(200)));
+	return (this->simple_response(200, "OK", this->build_ressource_path(200)));
 }
 
 void	HttpResponse::handle_post()
@@ -430,12 +435,12 @@ void	HttpResponse::handle_post()
 	if (!is_directory(upload_path.c_str())) //upload on a file might be handle with CGI
 		return (this->simple_response(500, "Internal Server Error", this->_serv.get_error_pages()[500]));
 
-	std::string extension = get_file_ext(this->build_resource_path(200));
+	std::string extension = get_file_ext(this->build_ressource_path(200));
 	if (!ContentTypeList().count(extension))
 		return (this->simple_response(415, "Unsupported Media Type", this->_serv.get_error_pages()[415]));
 
 	//Error concerning size of the body & content length might be checked here
-	std::string file_path = this->build_resource_path(200);
+	std::string file_path = this->build_ressource_path(200);
 	size_t pos = file_path.find_last_of('/');
 	file_path = file_path.erase(0, pos);
 	file_path = upload_path + file_path;
@@ -449,7 +454,7 @@ void	HttpResponse::handle_post()
 
 void	HttpResponse::handle_delete(){
 
-	std::string path = this->build_resource_path(200);
+	std::string path = this->build_ressource_path(200);
 	if (std::remove(path.c_str()) == 0)
 		return (this->simple_response(204, "No Content"));
 	else
