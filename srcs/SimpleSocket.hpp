@@ -9,6 +9,7 @@
 # include <fcntl.h>
 # include <sys/socket.h>
 # include <arpa/inet.h>
+# include "utils.hpp"
 
 //	max number of pending connections that can be queued up before
 //	connections are refused.
@@ -18,7 +19,7 @@ class SimpleSocket
 {
 	public:
 		//constructor
-		SimpleSocket(int port, u_long interface, int domain, int service, int protocol);
+		SimpleSocket(int port, std::string ip, int domain, int service, int protocol);
 
 		int	establish_socket(int domain, int service, int protocol);
 

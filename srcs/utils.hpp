@@ -6,6 +6,7 @@
 # include <iostream>
 # include <vector>
 # include <stdlib.h>
+#include <sstream>
 
 # define RED "\033[31m"
 # define GREEN "\033[32m"
@@ -29,6 +30,7 @@ class nullptr_t
 		void operator&() const;  // Can't take address of nullptr
 };
 
-void	error_exit(std::string	error_msg); // used inside ServerConfig and ConfigFile
+void			error_exit(std::string	error_msg); // used inside ServerConfig and ConfigFile
+std::string		ip_to_string(int *host); // used to convert an ip array to a string
 
 #endif

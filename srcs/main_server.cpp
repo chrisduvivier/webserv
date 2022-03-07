@@ -2,6 +2,7 @@
 #include "ServerConfig.hpp"
 #include "ConfigFile.hpp"
 #include <vector>
+#include <string>
 
 # define PORT 8080
 
@@ -31,7 +32,9 @@ int main(int argc, char *argv[])
 	//	Getters and their use
 	/*std::vector<ServerConfig>::iterator it1 = Server_vector.begin();
 
-	std::cout << it1->get_port() << std::endl;
+	std::string ip = ip_to_string(it1->get_host());
+	std::cout << "port = " << it1->get_port() << std::endl;
+	std::cout << "ip = " << ip << std::endl;
 	std::cout << it1->get_server_names()[0] << std::endl;
 	std::cout << it1->get_client_max_body_size() << std::endl;
 	std::map<int, std::string>::iterator	it2;
@@ -66,7 +69,13 @@ int main(int argc, char *argv[])
 	}*/
 
     // create a server socket instance and run it
-    ServerSocket Server(PORT, INADDR_ANY, AF_INET, SOCK_STREAM, 0);
+
+	std::vector<ServerConfig>::iterator it1 = Server_vector.begin();
+
+	std::string ip = ip_to_string(it1->get_host());
+	int port = it1->get_port();
+
+    ServerSocket Server(port, ip, AF_INET, SOCK_STREAM, 0);
 	Server.setConf(conf_file.populate(0));
     try {
         Server.init();

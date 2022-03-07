@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/08 11:30:54 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/01 16:57:22 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/03/07 15:03:50 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ class ServerConfig
 
 	int										get_port();
 	int										*get_host();
-	std::string								get_host_name();
+	/*std::string								get_host_name();*/
 	std::string								*get_server_names();
 	int										get_client_max_body_size();
 	std::map<int, std::string>				get_error_pages();
