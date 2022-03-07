@@ -14,6 +14,7 @@
 # include "stdio.h"
 # include "utils.hpp"
 # include "HttpRequest.hpp"
+# include "ServerConfig.hpp"
 # include "webserv.hpp"
 
 # ifndef BUFFER_SIZE
@@ -25,13 +26,15 @@ class Cgi
 {
 	public:
 		Cgi();
-		Cgi(HttpRequest request);
+		Cgi(HttpRequest request, std::string path_to_cgi, ServerConfig serv);
+		~Cgi();
 		
 		//template for fork and execute the cgi birary
-		int     execute_cgi(std::string path_to_cgi);
+		int     execute_cgi();
 		void    init_var();
-		void    set_var(HttpRequest request);
+		void    set_var(HttpRequest request, std::string path_to_cgi, ServerConfig serv);
 		void	set_env();
+		void	free_env();
 		void	print_env();
 		std::string get_body() const;
 
@@ -55,6 +58,7 @@ class Cgi
 		// std::string _redirect_status;
 		std::string	_body;
 		bool		_error;
+		char		*_args[3];
 		char		*_env[15];
 };
 

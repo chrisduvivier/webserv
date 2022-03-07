@@ -15,6 +15,14 @@
 
 char*	strcat(std::string s1, std::string s2);
 
+/* 
+* "converting ... to string" macro
+* https://stackoverflow.com/a/5590404
+*/
+# include <sstream>
+# define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
+
 class nullptr_t
 {
 	public:

@@ -102,7 +102,7 @@ int ServerSocket::run()
 		std::cout << "+++++++ Waiting for new connection ++++++++\n";
 		for (int i=0; i < FD_SETSIZE; i++)
 		{
-			// check if server_socket current_sockets, in other word, that is ready for reading right now.
+			// tests if the file descriptor `i` is part of the set => ready for reading right now.
 			if (FD_ISSET(i, &ready_sockets))
 			{
 				if (i == this->_sock)	//new connection is established
@@ -121,9 +121,6 @@ int ServerSocket::run()
 						handle_connection(i, _conf);
 					} catch (std::exception &e) {
 						std::cout << e.what() << std::endl;
-						close(i);
-						FD_CLR(i, &current_sockets);
-						break;
 					}
 					close(i);
 					FD_CLR(i, &current_sockets);

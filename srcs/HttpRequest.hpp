@@ -24,6 +24,7 @@ class HttpRequest
 			this->_version = copy._version;
 			this->_headers = copy._headers;
 			this->_body = copy._body;
+			this->_query_string = copy._query_string;
 		}
 
 		HttpRequest & operator = (const HttpRequest &rhs)
@@ -36,6 +37,7 @@ class HttpRequest
 				this->_version = rhs._version;
 				this->_headers = rhs._headers;
 				this->_body = rhs._body;
+				this->_query_string = rhs._query_string;
 			}
 			return *this;
 		}
