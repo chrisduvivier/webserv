@@ -28,16 +28,20 @@ void	ServerSocket::setConf(ServerConfig conf) {
 
 /*
 **	Read the request and handle appropriate result
+**  "send" with a zero flags argument is equivalent to write(2).
+**	send doesn't always send all the bytes requested, it has to be used in a loop to ensure that all the data is correctly sent.
 */
 int	handle_connection(int client_sock, ServerConfig conf)
 {
-	int		ret = 0;
+	int			ret = 0;
 	static int	request_number = 0;
-	char	buffer[REQUEST_READ_BUFFER];
-	std::string	response = "HTTP/1.1 200 OK\r\n\r\n Congratulation !";	//default response
+	char		buffer[REQUEST_READ_BUFFER];
+	std::string	response;
 
 	bzero(&buffer, REQUEST_READ_BUFFER);
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
+	if (ret < 0)
+		throw MyException("Exception: Couldn't read from client socket");
 	
 	// TODO: ONLY TO KEEP TRACK OF CLIENT REQUEST. DELETE AT END
 	std::ofstream outfile;
@@ -49,16 +53,10 @@ int	handle_connection(int client_sock, ServerConfig conf)
 	outfile << std::string(buffer);
 	// UNTIL HERE
 
-	if (ret < 0)
-		throw MyException("Exception: Couldn't read from client socket");
-
 	HttpRequest client_http_request(buffer);
 	HttpResponse http_response(client_http_request, conf);
 	http_response.build_response();
 	response = http_response.get_response();
-
-	// "send" with a zero flags argument is equivalent to write(2).
-	// send doesn't always send all the bytes requested, it has to be used in a loop to ensure that all the data is correctly sent.
 
 	size_t 		response_size = response.length();
 	int			bytes_sent;
@@ -68,11 +66,10 @@ int	handle_connection(int client_sock, ServerConfig conf)
 	{
 		bytes_sent = send(client_sock, bytes_to_send, response_size, 0);
 		if (bytes_sent < 0)
-			return (-1);
+			throw MyException("Exception: Error while sending response to client");
 		bytes_to_send += bytes_sent;
 		response_size -= bytes_sent;
 	}
-
 	return (0);
 }
 
@@ -124,6 +121,9 @@ int ServerSocket::run()
 						handle_connection(i, _conf);
 					} catch (std::exception &e) {
 						std::cout << e.what() << std::endl;
+						close(i);
+						FD_CLR(i, &current_sockets);
+						break;
 					}
 					close(i);
 					FD_CLR(i, &current_sockets);

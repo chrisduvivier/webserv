@@ -42,7 +42,7 @@ HttpRequest::HttpRequest(char *buffer)
 
 	this->parse_url(this->get_url());
 	
-	std::cout << "------------   PRINTING   ------------\n";
+	std::cout << "---------  PRINTING REQUEST  ---------\n";
 	this->print();
 	std::cout << "-------------    DONE   --------------\n";
 }

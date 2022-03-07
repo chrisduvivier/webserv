@@ -88,6 +88,7 @@ void	Cgi::print_env()
 int     Cgi::execute_cgi(std::string path_to_cgi)
 { 
 	std::cout << "== execute_cgi ==\n";
+	char **empty_args = NULL;
 	int fd_pipe[2];
 	int fdin = dup(STDIN_FILENO);
 	if (fdin < 0)
@@ -107,7 +108,7 @@ int     Cgi::execute_cgi(std::string path_to_cgi)
 		// dup2(old, new) function copies the old_file_descriptor into the new_file_descriptor.
 		dup2(fd_pipe[0], STDIN_FILENO);    // [    0     |     1     ]
 		dup2(fd_pipe[1], STDOUT_FILENO);   // [ read end | write end ]
-		if (execve(path_to_cgi.c_str(), NULL, _env) < 0)
+		if (execve(path_to_cgi.c_str(), empty_args, _env) < 0)
 		{
 			std::cerr << RED << "Error: CGI EXEC\n" << RESET;
 			return (-1);
@@ -123,6 +124,8 @@ int     Cgi::execute_cgi(std::string path_to_cgi)
 	{
 		memset(buffer, 0, BUFFER_SIZE);
 		ret = read(fd_pipe[0], buffer, BUFFER_SIZE);
+		if (ret < 0)
+			return (-1);
 		_body += buffer;
 		
 	}
