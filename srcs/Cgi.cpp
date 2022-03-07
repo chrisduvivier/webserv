@@ -4,10 +4,15 @@ Cgi::Cgi(){
 	init_var();
 }
 
-Cgi::Cgi(HttpRequest request)
+
+Cgi::Cgi(HttpRequest request, std::string path_to_cgi, ServerConfig serv)
 {
 	init_var();
-	set_var(request);
+	set_var(request, path_to_cgi, serv);
+}
+
+Cgi::~Cgi(){
+	free_env();
 }
 
 void    Cgi::init_var()
@@ -26,13 +31,13 @@ void    Cgi::init_var()
 	_SERVER_PROTOCOL = 		"HTTP/1.1";
 	_SERVER_PORT = 			"";
 	_SERVER_SOFTWARE = 		"";
-	// _REDIRECT_STATUS = 		"";
 	_body = 				"";
 	_error = 				false;
 	_env[0] = 				NULL;
+	_args[0] = 				NULL;
 }
 
-void    Cgi::set_var(HttpRequest request)
+void    Cgi::set_var(HttpRequest request, std::string path_to_cgi, ServerConfig serv)
 {
 	char cwd[256];
 
@@ -40,20 +45,27 @@ void    Cgi::set_var(HttpRequest request)
 	std::string full_path(cwd);
 	// full_path += PUBLIC_HTML_FOLDER;
 
-	_CONTENT_LENGTH = request.get_headers().at("Content-Length");
+	if (request.get_headers().count("Content-Length"))
+		_CONTENT_LENGTH = request.get_headers().at("Content-Length");
 	_REQUEST_METHOD = request.get_method();
 	_PATH_INFO = request.get_url();
-	_SERVER_PORT = "8080";
+	_SERVER_PORT = SSTR(serv.get_port());
 	_SERVER_SOFTWARE = "webserv";
 	_SCRIPT_FILENAME = (full_path + request.get_url()).c_str();
 	_SCRIPT_NAME = request.get_url();
 	_PATH_TRANSLATED = (full_path + request.get_url()).c_str();
 	_QUERY_STRING = request.get_body();
 	if (request.get_method() == "GET")
+	{
 		_QUERY_STRING = request.get_query_string();
-		std::cout << "ENV[_QUERY_STRING] = " << _QUERY_STRING << std::endl;
+		_CONTENT_LENGTH = _QUERY_STRING.length();
+	}
 	_SERVER_NAME = "http://localhost";  //TODO: get from server config
-	// _REDIRECT_STATUS =  "200";
+
+	/* set args for the execve */
+	_args[0] = strdup((char *)PYTHON_INTERPRETER);		//full path of Python3 interpreter
+	_args[1] = strdup((char *)path_to_cgi.c_str());
+	_args[2] = NULL;
 }
 
 void	Cgi::set_env()
@@ -73,7 +85,23 @@ void	Cgi::set_env()
 	_env[12] = strcat("SERVER_PORT=", 		_SERVER_PORT);
 	_env[13] = strcat("SERVER_SOFTWARE=", 	_SERVER_SOFTWARE);
 	_env[14] = NULL;
-	// print_env();
+	print_env();
+}
+
+void	Cgi::free_env()
+{
+	for (int i = 0; i < 14; i++)
+	{
+		if (_env[i])
+		{
+			free(_env[i]);
+			_env[i] = NULL;
+		}
+	}
+	if (_args[0])
+		free(_args[0]);
+	if (_args[1])
+		free(_args[1]);
 }
 
 void	Cgi::print_env()
@@ -85,21 +113,30 @@ void	Cgi::print_env()
 }
 
 // execute the cgi file using fork
-int     Cgi::execute_cgi(std::string path_to_cgi)
+int     Cgi::execute_cgi()
 { 
 	std::cout << "== execute_cgi ==\n";
-	char **empty_args = NULL;
+	
 	int fd_pipe[2];
 	int fdin = dup(STDIN_FILENO);
 	if (fdin < 0)
-		std::cout << "Error: dup\n";
+	{
+		std::cerr << "Error: dup\n";
+		return (-1);
+	}
 	int fdout = dup(STDOUT_FILENO);
 	if (fdin < 0)
-		std::cout << "Error: dup\n";
+	{
+		std::cerr << "Error: dup\n";
+		return (-1);
+	}
 
 	char buffer[BUFFER_SIZE + 1];
 	if (pipe(fd_pipe) < 0)
-		std::cout << "Error: pipe\n";
+	{
+		std::cerr << "Error: pipe\n";
+		return (-1);
+	}
 	this->set_env();
 
 	int cgi_pid = fork();
@@ -108,7 +145,7 @@ int     Cgi::execute_cgi(std::string path_to_cgi)
 		// dup2(old, new) function copies the old_file_descriptor into the new_file_descriptor.
 		dup2(fd_pipe[0], STDIN_FILENO);    // [    0     |     1     ]
 		dup2(fd_pipe[1], STDOUT_FILENO);   // [ read end | write end ]
-		if (execve(path_to_cgi.c_str(), empty_args, _env) < 0)
+		if (execve(PYTHON_INTERPRETER, _args, _env) < 0)
 		{
 			std::cerr << RED << "Error: CGI EXEC\n" << RESET;
 			return (-1);
@@ -116,8 +153,6 @@ int     Cgi::execute_cgi(std::string path_to_cgi)
 		exit(0);
 	}
 	close(fd_pipe[1]);	//close write side
-	
-	waitpid(-1, NULL, 0);
 
 	int ret = 1;
 	while (ret > 0)
@@ -130,9 +165,9 @@ int     Cgi::execute_cgi(std::string path_to_cgi)
 		
 	}
 	if (dup2(fdin, STDIN_FILENO) < 0)
-		std::cout << "Error: dup00\n";
+		std::cerr << "Error: dup00\n";
 	if (dup2(fdout, STDOUT_FILENO) < 0)
-		std::cout << "Error: dup11\n";
+		std::cerr << "Error: dup11\n";
 	return (ret);
 };
 

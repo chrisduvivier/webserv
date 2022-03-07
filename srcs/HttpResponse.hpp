@@ -38,7 +38,11 @@ class HttpResponse
 			this->_protocol = copy._protocol;
 			this->_status_code = copy._status_code;
 			this->_status_text = copy._status_text;
+			this->_headers = copy._headers;
 			this->_body = copy._body;
+			this->_response = copy._response;
+			this->_serv = copy._serv;
+			this->_req = copy._req;
 		}
 
 		HttpResponse & operator = (const HttpResponse &rhs)
@@ -49,7 +53,11 @@ class HttpResponse
 				this->_protocol = rhs._protocol;
 				this->_status_code = rhs._status_code;
 				this->_status_text = rhs._status_text;
+				this->_headers = rhs._headers;
 				this->_body = rhs._body;
+				this->_response = rhs._response;
+				this->_serv = rhs._serv;
+				this->_req = rhs._req;
 			}
 			return *this;
 		}

@@ -126,15 +126,15 @@ void	HttpResponse::build_response() {
 
 	if (extension == "cgi") //handling CGI
 	{
-		Cgi cgi(this->_req);
-		int ret = cgi.execute_cgi(path);
+		Cgi cgi(this->_req, path, this->_serv);
+		int ret = cgi.execute_cgi();
 		if (ret < 0)
 			return (this->simple_response(500, "Internal Server Error", error[500]));
 		this->_body = cgi.get_body();	//read cgi execution's output
 		// header is added here manually for now
 		this->_headers["Content-Type"] = "text/html; charset=utf-8";
-		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << this->_body.length()) )->str();
-		std::cout << "EXECVE : FINISH! => body=[" << this->_body << "]\n\n";
+		this->_headers["Content-Length"] = SSTR(this->_body.length());
+		// std::cout << "EXECVE : FINISH! => body=[" << this->_body << "]\n\n";
 		return (this->simple_response(200, "OK"));
 	}
 
@@ -294,13 +294,13 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	resource.close();
 	this->_body = buff.str();
 	int body_size = this->_body.length();
-	this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+	this->_headers["Content-Length"] = SSTR(body_size);
 	this->_response = this->construct_response();
 }
 
 void	HttpResponse::directory_response() {
 
-	std::cout << "directory_response IN" << std::endl;
+	// std::cout << "directory_response IN" << std::endl;
 	std::string location = this->get_location();
 
 	if (_serv.get_location()[location].get_listing())
@@ -339,7 +339,7 @@ void	HttpResponse::directory_response() {
 		this->_headers["Content-Type"] = "text/html; charset=utf-8";
 		this->_body = body;
 		int body_size = this->_body.length();
-		this->_headers["Content-Length"] = static_cast<std::ostringstream*>( &(std::ostringstream() << body_size) )->str();
+		this->_headers["Content-Length"] = SSTR(body_size);
 		this->_response = this->construct_response();
 		return ;
 	}
