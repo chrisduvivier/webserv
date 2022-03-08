@@ -332,7 +332,7 @@ void	HttpResponse::handle_post()
 
 	std::string file_path = this->build_ressource_path();
 	size_t pos = file_path.find_last_of('/');
-	file_path = file_path.erase(0, pos);
+	file_path = file_path.erase(0, pos + 1);
 	file_path = upload_path + file_path;
 	std::ofstream new_file(file_path.c_str());
 	new_file << this->_req.get_body();
