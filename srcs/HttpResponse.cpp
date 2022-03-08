@@ -223,14 +223,12 @@ std::string HttpResponse::build_ressource_path() {
 	{
 		if (location != "/")
 		{
-			std::cout << "=======DEBUG PATH =======" << std::endl;
-			std::cout << "path: " << path << " | location: " << location << std::endl;
 			size_t to_erase = path.find(location);
-			std::cout << "to_erase(1): " << to_erase << std::endl;
 			to_erase += location.length();
-			std::cout << "to_erase(2): " << to_erase << std::endl;
-			path.erase(0, to_erase);
+			path.erase(0, to_erase + 1);
 		}
+		else
+			path.erase(0, 1);
 		path = this->_serv.get_location()[location].get_directory() + path;
 	}
 	std::cout << "----- DEBUG_PATH: " << path << std::endl;
