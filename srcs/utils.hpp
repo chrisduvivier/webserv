@@ -6,6 +6,14 @@
 # include <iostream>
 # include <vector>
 # include <stdlib.h>
+
+# include <map>
+//used to identify directory
+# include <sys/stat.h>
+//used to read into a directory
+# include <sys/types.h>
+# include <dirent.h>
+
 #include <sstream>
 
 # define RED "\033[31m"
@@ -40,5 +48,34 @@ class nullptr_t
 
 void			error_exit(std::string	error_msg); // used inside ServerConfig and ConfigFile
 std::string		ip_to_string(int *host); // used to convert an ip array to a string
+
+/*
+	--
+		This function returns a map that contains ressources extension that are supported on the server as key
+		and their corresponding Content-Type as value
+	--
+*/
+std::map<std::string, std::string> ContentTypeList();
+
+/*
+	--
+		This function returns 1 if an url leads to a directory, 0 if it does not
+	--
+*/
+int	is_directory(const char *path);
+
+/*
+	--
+		This function cuts the extension of an url and returns it
+	--
+*/
+std::string	get_file_ext(std::string path);
+
+/*
+	--
+		This function takes an integer and returns its std::string representation
+	--
+*/
+std::string	itostr(int nbr);
 
 #endif

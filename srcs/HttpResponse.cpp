@@ -1,53 +1,5 @@
 #include "HttpResponse.hpp"
 
-												/* ---- UTILS FUNCTIONS ---- */
-/*
-	--
-		This function returns a map that contains ressources extension that are supported on the server as key
-		and their corresponding Content-Type as value
-	--
-*/
-std::map<std::string, std::string> ContentTypeList(){
-
-	std::map<std::string, std::string> contentType;
-	contentType["html"] = "text/html; charset=utf-8";
-	contentType["txt"] = "text/plain; charset=utf-8";
-	contentType["jpeg"] = "image/jpeg";
-	contentType["png"] = "image/png";
-	contentType["gif"] = "image/gif";
-	contentType["bmp"] = "image/bmp";
-	contentType["webp"] = "image/webp";
-	contentType["ico"] = "image/vnd.microsoft.icon";
-	contentType["cgi"] = "cgi";
-	return (contentType);
-}
-
-int	is_directory(const char *path) {
-
-	struct stat stats;
-
-    stat(path, &stats);
-    if (S_ISDIR(stats.st_mode))
-        return 1;
-    return 0;
-}
-
-std::string	get_file_ext(std::string path) {
-
-	std::string extension;
-	size_t pos = path.find('.', 1);
-	if (pos != std::string::npos)
-	{
-		extension = path.substr(pos + 1);
-		pos = extension.find("?");
-		if (pos != std::string::npos)
-			extension = extension.erase(pos, std::string::npos);
-	}
-	return (extension);
-}
-
-												/* ---- CLASS FUNCTIONS ---- */
-
 HttpResponse::HttpResponse() : _protocol("HTTP/1.1") {}
 
 HttpResponse::HttpResponse(HttpRequest request, ServerConfig serv) : _protocol("HTTP/1.1") {
@@ -196,7 +148,7 @@ int	HttpResponse::check_redirection() {
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (this->check_max_body_size());
 	
-	this->_headers["Location"] = "http://localhost:8080" + this->build_ressource_path(); //Change hardcoded host
+	this->_headers["Location"] = "http://localhost:" + itostr(_serv.get_port()) + this->build_ressource_path(); //Change hardcoded host
 	// this->_headers["Location"] = this->_serv.get_host() + ':' + this->_serv.get_port() + this->build_resource_path(301); //smth like that
 	return (301);
 }
@@ -323,7 +275,7 @@ void	HttpResponse::directory_response() {
 			body = body + "   </br></br></br>";
 			while ((ep = readdir (dp)))
 			{
-				body = body + "  <a href=\"http://localhost:8080" + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
+				body = body + "  <a href=\"http://localhost:" + itostr(_serv.get_port()) + itostr(_serv.get_port()) + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
 				body += '\n';
 			}
 			body += " </body>\n</html>";

@@ -18,12 +18,6 @@
 # include "ConfigFile.hpp"
 # include "ServerConfig.hpp"
 
-//used to identify directory
-# include <sys/stat.h>
-
-//used to read into a directory
-# include <sys/types.h>
-# include <dirent.h>
 
 class HttpResponse
 {
