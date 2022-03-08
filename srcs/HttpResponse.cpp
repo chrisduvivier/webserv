@@ -148,8 +148,7 @@ int	HttpResponse::check_redirection() {
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (this->check_max_body_size());
 	
-	this->_headers["Location"] = "http://localhost:" + itostr(_serv.get_port()) + this->build_ressource_path(); //Change hardcoded host
-	// this->_headers["Location"] = this->_serv.get_host() + ':' + this->_serv.get_port() + this->build_resource_path(301); //smth like that
+	this->_headers["Location"] = "http://localhost:" + itostr(_serv.get_port()) + this->build_ressource_path();
 	return (301);
 }
 
