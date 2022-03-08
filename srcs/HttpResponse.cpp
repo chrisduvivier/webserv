@@ -215,13 +215,26 @@ std::string HttpResponse::build_ressource_path() {
 	std::string location = this->get_location();
 	if (!this->_serv.get_location()[location].get_redirection().empty())
 	{
-		size_t to_erase = this->get_location().length();
+		size_t to_erase = location.length();
 		path.erase(0, to_erase + 1);
-		path = this->_serv.get_location()[this->get_location()].get_redirection() + path;
+		path = this->_serv.get_location()[location].get_redirection() + path;
 	}
 	else
-		path = '.' + this->_serv.get_location()[this->get_location()].get_directory() + path;
-	return (path);
+	{
+		if (location != "/")
+		{
+			std::cout << "=======DEBUG PATH =======" << std::endl;
+			std::cout << "path: " << path << " | location: " << location << std::endl;
+			size_t to_erase = path.find(location);
+			std::cout << "to_erase(1): " << to_erase << std::endl;
+			to_erase += location.length();
+			std::cout << "to_erase(2): " << to_erase << std::endl;
+			path.erase(0, to_erase);
+		}
+		path = this->_serv.get_location()[location].get_directory() + path;
+	}
+	std::cout << "----- DEBUG_PATH: " << path << std::endl;
+	return (path); 
 }
 
 void	HttpResponse::simple_response(int code, std::string status) {
@@ -275,7 +288,7 @@ void	HttpResponse::directory_response() {
 			body = body + "   </br></br></br>";
 			while ((ep = readdir (dp)))
 			{
-				body = body + "  <a href=\"http://localhost:" + itostr(_serv.get_port()) + itostr(_serv.get_port()) + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
+				body = body + "  <a href=\"http://localhost:" + itostr(_serv.get_port()) + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
 				body += '\n';
 			}
 			body += " </body>\n</html>";
