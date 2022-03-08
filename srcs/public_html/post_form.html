@@ -1,21 +1,26 @@
 <html>
+
 <head>
     <title>Simple Form</title>
 </head>
 
 <body>
     <h1>Simple Survey (POST version)</h1>
-    <h3><p>Please tell us about your favorite game</p></h3>
+    <h3>
+        <p>Please tell us about your favorite game</p>
+    </h3>
     <form action="/cgi-bin/simple_form.cgi" method="POST">
-    <table>
-        <tr>
-            <td>Name of the game:</td>
-            <td><input type="text" name="game"><td>
-        </tr>
-        <tr>
-            <td colspan="2"><input type="submit" value="Submit"></td>
-        </tr>
-    </table>
+        <table>
+            <tr>
+                <td>Name of the game:</td>
+                <td><input type="text" name="game">
+                <td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="submit" value="Submit"></td>
+            </tr>
+        </table>
     </form>
 </body>
-</html>    
+
+</html>

@@ -43,7 +43,6 @@ void    Cgi::set_var(HttpRequest request, std::string path_to_cgi, ServerConfig 
 
 	getcwd(cwd, 256);
 	std::string full_path(cwd);
-	// full_path += PUBLIC_HTML_FOLDER;
 
 	if (request.get_headers().count("Content-Length"))
 		_CONTENT_LENGTH = request.get_headers().at("Content-Length");
