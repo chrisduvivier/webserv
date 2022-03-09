@@ -28,19 +28,22 @@
 
 # define REQUEST_READ_BUFFER  10256
 
-class ServerSocket : public SimpleSocket
+class ServerSocket
 {
 	public:
-		ServerSocket(int port, std::string ip, int domain = AF_INET, int service = SOCK_STREAM, int protocol = 0) : 
-			SimpleSocket(port, ip, domain, service, protocol) {};
+		ServerSocket(std::vector<ServerConfig>	conf, int domain = AF_INET, int service = SOCK_STREAM, int protocol = 0);
 		
 		// throw exception on error
-		void    init();
-		int		run();
-		void	setConf(ServerConfig conf);
+		void    			init(int sock, struct sockaddr_in address);
+		int					run();
+		void				setConf(ServerConfig conf);
+		int					establish_socket(int domain, int service, int protocol);
 
 	private:
-		ServerConfig _conf;
+		ServerConfig 				_conf;
+		std::vector<ServerConfig>	_conf_vector;
+		std::vector<SimpleSocket>	_socket_vector;
+
 };
 
 #endif

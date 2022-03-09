@@ -26,6 +26,7 @@ class SimpleSocket
 		struct sockaddr_in  get_address(void);
 		int                 get_sock(void);
 		int                 get_connection(void);
+		std::vector<int>	_client;
 
 	protected:
 		struct sockaddr_in  _address;

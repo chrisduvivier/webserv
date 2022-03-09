@@ -69,21 +69,15 @@ int main(int argc, char *argv[])
 	}*/
 
     // create a server socket instance and run it
-
-	std::vector<ServerConfig>::iterator it1 = Server_vector.begin();
-
-	std::string ip = ip_to_string(it1->get_host());
-	int port = it1->get_port();
-
-    ServerSocket Server(port, ip, AF_INET, SOCK_STREAM, 0);
-	Server.setConf(conf_file.populate(0));
-    try {
+    ServerSocket Server(Server_vector, AF_INET, SOCK_STREAM, 0);
+	/*Server.setConf(conf_file.populate(0));*/
+    /*try {
         Server.init();
     } catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 		return (-1);
-	}
-
+	}*/
+	
     try {
         Server.run();
     } catch (std::exception& e) {

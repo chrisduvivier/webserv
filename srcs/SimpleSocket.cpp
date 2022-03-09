@@ -8,14 +8,10 @@ SimpleSocket::SimpleSocket(int port, std::string ip, int domain, int service, in
 
 	// define address structure
 	_address.sin_family = domain;
-	/*std::cout << "port = " << port << std::endl;*/
-	/*_address.sin_addr.s_addr = htonl(interface);*/
 	// Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, ip.c_str(), &_address.sin_addr.s_addr) <= 0)
         error_exit("Invalid address / Address not supported \n");
 	_address.sin_port = htons(port);
-	/*std::cout << "ip = " << ip << std::endl;
-	std::cout << "sin_add = " << _address.sin_addr.s_addr << std::endl;*/
 
 	// Establish socket
 	_sock = establish_socket(domain, service, protocol);
