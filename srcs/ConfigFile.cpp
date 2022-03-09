@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFile.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: user42 <user42@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/03 15:33:18 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/08 12:05:10 by user42           ###   ########.fr       */
+/*   Updated: 2022/03/09 15:49:05 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ ConfigFile::ConfigFile(char *file)
 	_server_nb = 0;
     inFile.open(file);
 	if (!inFile)
-		error_exit("Config file : can't open config file\n");
+		error_exit("Config file : can't open file\n");
     strStream << inFile.rdbuf(); // read the file
 	str = strStream.str(); // str holds the content of the file
 	inFile.close();
@@ -133,7 +133,7 @@ void	ConfigFile::divide_servers(std::string str)
 	while (i > 0 && str[i] != '}')
 	{
 		if (isspace(str[i]) == 0)
-			error_exit("Please comment/delete text outside the server scope\n");
+			error_exit("Config file : Please comment/delete text outside the server scope\n");
 		i--;
 	}
 	i = str.find("server");
@@ -145,7 +145,7 @@ void	ConfigFile::divide_servers(std::string str)
 		while (i > 0) // checking if text outside the server scope
 		{
 			if (isspace(str[i]) == 0)
-				error_exit("Please comment text outside the server scope\n");
+				error_exit("Config file : Please comment text outside the server scope\n");
 			i--;
 		}
 		i = temp;
@@ -180,12 +180,14 @@ void	ConfigFile::divide_servers(std::string str)
 			i++;
 		}
 		if (i == _server[x].size())
-			error_exit("brackets in config file not closed\n");
+			error_exit("Config file : brackets not closed\n");
 		str = _server[x].substr(i, _server[x].size() - i);
 		_server[x] = _server[x].substr(0, i);
 		i = str.find("server");
 		x++;
 		_server_nb++;
+		if (_server_nb > 45)
+			error_exit("Config file : server number limit exceeded\n");
 	}
 }
 
@@ -217,7 +219,7 @@ void	ConfigFile::listen(int x)
 {
 	int	i = keyword("listen", _server[x], 0);
 	if (i == (int)std::string::npos)
-		error_exit("Error : no port to listen to in config file\n");
+		error_exit("Config file : no port to listen to\n");
 	i += 6;
 	while (i < (int)_server[x].size())
 	{
@@ -448,7 +450,7 @@ ServerConfig		ConfigFile::listen_check(int x)
 		else
 			error_exit("Config file : no port specified\n");
 	}
-	else	// no host specified => default is 0.0.0.0
+	else	// no host specified => default is 0.0.0.0 = all ip available
 	{
 		serv.set_host(0, 0);
 		serv.set_host(0, 1);
