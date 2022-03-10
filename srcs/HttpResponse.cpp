@@ -49,14 +49,21 @@ void	HttpResponse::print() const {
 	--
 		This function will operate the different processes that will lead to
 		the creation of the appropriate response to the client
+
+		if the Parsing of the request detected an error, the code is set to the
+		error status code passed by request object
 	--
 */
-void	HttpResponse::build_response() {
-
+void	HttpResponse::build_response()
+{
 	std::map<int, std::string> error = _serv.get_error_pages();
+	int status_code;
 
-	int code = this->check_method();
-	switch(code) {
+	if (this->_req.get_parsing_error_code())
+		status_code = this->_req.get_parsing_error_code();
+	else
+		status_code = this->check_method();
+	switch(status_code) {
 	case 301:
 		return (this->simple_response(301, "Moved Permanently"));
 	case 400:
@@ -78,15 +85,16 @@ void	HttpResponse::build_response() {
 
 	if (extension == "cgi") //handling CGI
 	{
+		DEBUG("Call to CGI");
 		Cgi cgi(this->_req, path, this->_serv);
 		int ret = cgi.execute_cgi(this->_req);
 		if (ret < 0)
 			return (this->simple_response(500, "Internal Server Error", error[500]));
 		this->_body = cgi.get_body();	//read cgi execution's output
+		
 		// header is added here manually for now
 		this->_headers["Content-Type"] = "text/html; charset=utf-8";
 		this->_headers["Content-Length"] = SSTR(this->_body.length());
-		// std::cout << "EXECVE : FINISH! => body=[" << this->_body << "]\n\n";
 		return (this->simple_response(200, "OK"));
 	}
 

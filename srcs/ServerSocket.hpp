@@ -22,7 +22,7 @@
 # include "utils.hpp"
 # include "HttpRequest.hpp"
 # include "HttpResponse.hpp"
-# include "MyException.hpp"
+# include "ServerException.hpp"
 
 # include "ServerConfig.hpp"
 

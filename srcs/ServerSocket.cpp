@@ -37,12 +37,12 @@ void    ServerSocket::init(int sock, struct sockaddr_in address)
 
 	if (bind(sock, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
-		throw MyException("Error: Error bind socket");
+		throw ServerException("Error: Error bind socket");
 	}
 
 	if (listen(sock, BACKLOG_LEN) < 0)
 	{
-		throw MyException("Error: Failed to listen socket");
+		throw ServerException("Error: Failed to listen socket");
 	}
 }
 
@@ -64,27 +64,17 @@ void	ServerSocket::setConf(ServerConfig conf)
 int	handle_connection(int client_sock, ServerConfig conf)
 {
 	int			ret = 0;
-	static int	request_number = 0;
 	char		buffer[REQUEST_READ_BUFFER];
 	std::string	response;
 
 	bzero(&buffer, REQUEST_READ_BUFFER);
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
 	if (ret < 0)
-		throw MyException("Exception: Couldn't read from client socket");
-	
-	// TODO: ONLY TO KEEP TRACK OF CLIENT REQUEST. DELETE AT END
-	std::ofstream outfile;
-	outfile.open("request_log.txt", std::ios_base::app); // append instead of overwrite
-	std::stringstream tmp_request_number;
-	tmp_request_number << request_number;
-	outfile << "[" << tmp_request_number.str() << "]:";
-	request_number++;
-	outfile << std::string(buffer);
-	// UNTIL HERE
+		throw ServerException("Exception: Couldn't read from client socket");
 
-	HttpRequest client_http_request(buffer);
-	HttpResponse http_response(client_http_request, conf);
+	HttpRequest client_request;
+	client_request.parse_request(buffer);
+	HttpResponse http_response(client_request, conf);
 	http_response.build_response();
 	response = http_response.get_response();
 
@@ -96,7 +86,7 @@ int	handle_connection(int client_sock, ServerConfig conf)
 	{
 		bytes_sent = send(client_sock, bytes_to_send, response_size, 0);
 		if (bytes_sent < 0)
-			throw MyException("Exception: Error while sending response to client");
+			throw ServerException("Exception: Error while sending response to client");
 		bytes_to_send += bytes_sent;
 		response_size -= bytes_sent;
 	}
@@ -111,17 +101,17 @@ int ServerSocket::run()
 	fd_set		current_sockets;
 	fd_set		ready_sockets;
 	int			y = 0;
-	std::vector<SimpleSocket>::iterator it1 = _socket_vector.begin();
-	std::vector<SimpleSocket>::iterator it2 = _socket_vector.end();
+	std::vector<SimpleSocket>::iterator sock_iter = _socket_vector.begin();
 
 	// initialize my current set
 	FD_ZERO(&current_sockets);
-	while (it1 != it2)
+	while (sock_iter != _socket_vector.end())
 	{
-		FD_SET(it1->get_sock(), &current_sockets);
-		std::cout << "Socket listening on port " << ntohs(it1->get_address().sin_port) << std::endl;
-		it1++;
+		FD_SET(sock_iter->get_sock(), &current_sockets);
+		DEBUG("Socket listening on port " + SSTR(ntohs(sock_iter->get_address().sin_port)));
+		sock_iter++;
 	}
+	DEBUG("+++++++ Server is Listening ++++++++");
 	while (true)
 	{
 		ready_sockets = current_sockets;	//because select is destructive
@@ -133,19 +123,16 @@ int ServerSocket::run()
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
-		std::cout << "+++++++ Waiting for new connection ++++++++\n";
 		for (int i=0; i < FD_SETSIZE; i++)
 		{
-			it1 = _socket_vector.begin();
-			it2 = _socket_vector.end();	
+			sock_iter = _socket_vector.begin();
 			y = 0;
-			// tests if the file descriptor `i` is part of the set => ready for reading right now.
-			if (FD_ISSET(i, &ready_sockets))
+			if (FD_ISSET(i, &ready_sockets))							//tests if fd i is in the set => ready for reading.
 			{
-				while (it1 != it2)
+				while (sock_iter != _socket_vector.end())
 				{
 					y = 0;
-					if (i == it1->get_sock())	//new connection is established
+					if (i == sock_iter->get_sock())						//new connection is established
 					{
 						int client_socket;
 						if ((client_socket = accept(i, NULL, NULL)) < 0)
@@ -154,30 +141,29 @@ int ServerSocket::run()
 							return (-1);
 						}
 						FD_SET(client_socket, &current_sockets);
-						it1->_client.push_back(client_socket); // remember the client so we can id which server is linked to
-						y = 1; // signal to tell its a new connection 
+						sock_iter->_client.push_back(client_socket);	// remember the client so we can id which server is linked to
+						y = 1; 								// signal to tell its a new connection 
 						break ;
 					}
-					it1++;
+					sock_iter++;
 				}
 				if (y != 1)
 				{
-					it1 = _socket_vector.begin();
-					it2 = _socket_vector.end();
+					sock_iter = _socket_vector.begin();
 					y = 0;
-					while (it1 != it2)
+					while (sock_iter != _socket_vector.end())
 					{
-						if (std::find(it1->_client.begin(), it1->_client.end(), i) != it1->_client.end()) // search what server the client is linked to
+						if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
 							break ;
 						y++;
-						it1++;
+						sock_iter++;
 					}
 					try {
 						handle_connection(i, _conf_vector[y]); // main function to handle requests
 					} catch (std::exception &e) {
 						std::cout << e.what() << std::endl;
 					}
-					it1->_client.erase(std::remove(it1->_client.begin(), it1->_client.end(), i), it1->_client.end()); // forget client
+					sock_iter->_client.erase(std::remove(sock_iter->_client.begin(), sock_iter->_client.end(), i), sock_iter->_client.end()); //remove client
 					close(i);
 					FD_CLR(i, &current_sockets);
 				}

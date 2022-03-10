@@ -8,15 +8,15 @@
 # include <vector>
 
 # include "utils.hpp"
+# include "ServerException.hpp"
 
 class HttpRequest
 {
 	public:
 
 		HttpRequest();
-		HttpRequest(char *buffer);
 		// ~HttpRequest();
-		
+
 		HttpRequest (const HttpRequest &copy) 
 		{ 
 			this->_method = copy._method;
@@ -25,6 +25,7 @@ class HttpRequest
 			this->_headers = copy._headers;
 			this->_body = copy._body;
 			this->_query_string = copy._query_string;
+			this->_parsing_error_code = copy._parsing_error_code;
 		}
 
 		HttpRequest & operator = (const HttpRequest &rhs)
@@ -38,10 +39,14 @@ class HttpRequest
 				this->_headers = rhs._headers;
 				this->_body = rhs._body;
 				this->_query_string = rhs._query_string;
+				this->_parsing_error_code = rhs._parsing_error_code;
 			}
 			return *this;
 		}
 
+		void	parse_request(char *buffer);
+		void	parse_headers(std::string headers);
+		void	parse_body(std::string body);
 		void	parse_startline(std::string	one_line);
 		void	parse_header_line(std::string line);
 		void	parse_url(std::string url);
@@ -54,6 +59,7 @@ class HttpRequest
 		const std::map<std::string, std::string>	get_headers() const { return _headers; };
 		const std::string							get_body() const { return _body; };
 		const std::string							get_query_string() const { return _query_string; };
+		int									get_parsing_error_code() const { return _parsing_error_code; };
 		
 	private:
 		std::string                                     _method;
@@ -62,6 +68,7 @@ class HttpRequest
 		std::map<std::string, std::string>   			_headers;
 		std::string										_body;
 		std::string										_query_string;
+		int												_parsing_error_code;
 };
 
 #endif

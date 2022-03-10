@@ -113,8 +113,6 @@ void	Cgi::print_env()
 // execute the cgi file using fork
 int     Cgi::execute_cgi(HttpRequest request)
 { 
-	std::cout << "== execute_cgi ==\n";
-	
 	int fd_pipe[2];
 	int fdin = dup(STDIN_FILENO);
 	if (fdin < 0)

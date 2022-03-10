@@ -1,19 +1,19 @@
-#ifndef MY_EXCEPTION_HPP
-# define MY_EXCEPTION_HPP
+#ifndef SERVER_EXCEPTION_HPP
+# define SERVER_EXCEPTION_HPP
 
 # include <exception>
 # include <string>
 
-struct MyException : public std::exception
+struct ServerException : public std::exception
 {
     protected:
     	const char *errorMsg;
 
     public:
-		MyException (const char* str){
+		ServerException (const char* str){
 			errorMsg =  str;    
 		}
-		MyException (const std::string str){
+		ServerException (const std::string str){
 			errorMsg =  str.c_str();    
 		}
 		const char * what () const throw ()

@@ -21,6 +21,8 @@
 # define YELLOW "\033[33m"
 # define RESET "\033[0m"
 
+# define DEBUG(MSG) std::cout << "\033[0;35m\e[1m" << MSG << "\e[0m\033[0m" << std::endl;
+
 char*	strcat(std::string s1, std::string s2);
 
 /* 

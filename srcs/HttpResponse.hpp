@@ -11,7 +11,7 @@
 # include "utils.hpp"
 
 # include "HttpRequest.hpp"
-# include "MyException.hpp"
+# include "ServerException.hpp"
 
 # include "Cgi.hpp"
 
