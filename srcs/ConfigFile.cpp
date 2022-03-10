@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFile.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
+/*   By: rlinkov <rlinkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/03 15:33:18 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/09 15:49:05 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/03/10 17:22:32 by rlinkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,6 +341,8 @@ void	ConfigFile::error_page(int x)
 	_error_pages[x].insert(std::pair<int, std::string>(400, "./public_html/error_pages/400.html"));
 	_error_pages[x].insert(std::pair<int, std::string>(404, "./public_html/error_pages/404.html"));
 	_error_pages[x].insert(std::pair<int, std::string>(405, "./public_html/error_pages/405.html"));
+	_error_pages[x].insert(std::pair<int, std::string>(413, "./public_html/error_pages/413.html"));
+	_error_pages[x].insert(std::pair<int, std::string>(415, "./public_html/error_pages/415.html"));
 	_error_pages[x].insert(std::pair<int, std::string>(500, "./public_html/error_pages/500.html"));
 	_error_pages[x].insert(std::pair<int, std::string>(501, "./public_html/error_pages/501.html"));
 	/*std::map<int, std::string>::iterator it1 = _error_pages[x].begin();
