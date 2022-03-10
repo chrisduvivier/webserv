@@ -53,7 +53,6 @@ void    Cgi::set_var(HttpRequest request, std::string path_to_cgi, ServerConfig 
 	_SCRIPT_FILENAME = (full_path + request.get_url()).c_str();
 	_SCRIPT_NAME = request.get_url();
 	_PATH_TRANSLATED = (full_path + request.get_url()).c_str();
-	_QUERY_STRING = request.get_body();
 	if (request.get_method() == "GET")
 	{
 		_QUERY_STRING = request.get_query_string();
@@ -112,18 +111,12 @@ void	Cgi::print_env()
 }
 
 // execute the cgi file using fork
-int     Cgi::execute_cgi()
+int     Cgi::execute_cgi(HttpRequest request)
 { 
 	std::cout << "== execute_cgi ==\n";
 	
 	int fd_pipe[2];
 	int fdin = dup(STDIN_FILENO);
-	if (fdin < 0)
-	{
-		std::cerr << "Error: dup\n";
-		return (-1);
-	}
-	int fdout = dup(STDOUT_FILENO);
 	if (fdin < 0)
 	{
 		std::cerr << "Error: dup\n";
@@ -141,9 +134,11 @@ int     Cgi::execute_cgi()
 	int cgi_pid = fork();
 	if (cgi_pid == 0) // child process)
 	{
-		// dup2(old, new) function copies the old_file_descriptor into the new_file_descriptor.
 		dup2(fd_pipe[0], STDIN_FILENO);    // [    0     |     1     ]
 		dup2(fd_pipe[1], STDOUT_FILENO);   // [ read end | write end ]
+		close(fdin);
+		close(fd_pipe[0]);
+		close(fd_pipe[1]);
 		if (execve(PYTHON_INTERPRETER, _args, _env) < 0)
 		{
 			std::cerr << RED << "Error: CGI EXEC\n" << RESET;
@@ -151,7 +146,21 @@ int     Cgi::execute_cgi()
 		}
 		exit(0);
 	}
+	
+	// write the body of the request to the stdIN of cgi
+	if (request.get_method() == "POST")
+	{
+		std::cout << "Parent process write to cgi: string=[" << request.get_body().c_str() << "] with length=[" << request.get_body().length() << "]\n";
+		int res = write(fd_pipe[1], request.get_body().c_str(), request.get_body().length());
+		std::cout << "result of write = [" << res << "]\n";
+
+	}
 	close(fd_pipe[1]);	//close write side
+
+	int cgi_status = 0;
+	waitpid(cgi_pid, &cgi_status, 0);
+	if (WEXITSTATUS(cgi_status))
+		return (-1);
 
 	int ret = 1;
 	while (ret > 0)
@@ -160,13 +169,12 @@ int     Cgi::execute_cgi()
 		ret = read(fd_pipe[0], buffer, BUFFER_SIZE);
 		if (ret < 0)
 			return (-1);
-		_body += buffer;
-		
+		_body += buffer;	
 	}
 	if (dup2(fdin, STDIN_FILENO) < 0)
 		std::cerr << "Error: dup00\n";
-	if (dup2(fdout, STDOUT_FILENO) < 0)
-		std::cerr << "Error: dup11\n";
+	close(fd_pipe[0]);
+	close(fdin);
 	return (ret);
 };
 

@@ -5,19 +5,17 @@ import urllib.parse
 def main():
 	multiform = None
 	query_string = None
+	tmp = None
 
-	if os.environ.keys():
-		if os.environ['QUERY_STRING']:
-			query_string = os.environ['QUERY_STRING']
-		
-		# if os.environ['REQUEST_METHOD'] == "POST":				#POST => Read from STDIN 
-																	# -> couldn't so the workaround in mucase is to read from querystring as well
-		# 	if os.environ['CONTENT_LENGTH']:
-		# 		len = int(os.environ['CONTENT_LENGTH'])
-		# 		print(sys.stdin.read(len))
-		# elif os.environ['REQUEST_METHOD'] == "GET":				#GET => Read from QUERY_STRING
-		# 	if os.environ['QUERY_STRING']:
-		# 		query_string = os.environ['QUERY_STRING']
+	if os.environ.keys():		
+		if os.environ['REQUEST_METHOD'] == "POST":				#POST => Read from STDIN 
+			if os.environ['CONTENT_LENGTH']:
+				len = int(os.environ['CONTENT_LENGTH'])
+				tmp = sys.stdin.read(len)
+				query_string = tmp
+		elif os.environ['REQUEST_METHOD'] == "GET":				#GET => Read from QUERY_STRING
+			if os.environ['QUERY_STRING']:
+				query_string = os.environ['QUERY_STRING']
 
 	if query_string:
 		multiform = urllib.parse.parse_qs(query_string)

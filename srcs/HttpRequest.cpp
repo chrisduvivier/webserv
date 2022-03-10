@@ -44,7 +44,9 @@ HttpRequest::HttpRequest(char *buffer)
 	
 	std::cout << "---------  PRINTING REQUEST  ---------\n";
 	this->print();
-	std::cout << "-------------    DONE   --------------\n";
+
+	// std::cout << "buffer= [" << buffer << "]\n";
+	std::cout << "-------------    DONE   --------------\n\n";
 }
 
 void	HttpRequest::print() const

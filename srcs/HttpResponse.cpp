@@ -37,11 +37,11 @@ std::string	HttpResponse::construct_response() {
 
 void	HttpResponse::print() const {
 
-	std::cout << "----- HttpResponse: _response -----" << std::endl;
+	std::cout << "----- HTTP RESPONSE -----\n";
 	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
 	for(std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
-	std::cout << std::endl;
+	std::cout << "----- RESPONSE DONE -----\n\n";
 	/*std::cout << this->_body << std::endl;*/
 }
 
@@ -79,7 +79,7 @@ void	HttpResponse::build_response() {
 	if (extension == "cgi") //handling CGI
 	{
 		Cgi cgi(this->_req, path, this->_serv);
-		int ret = cgi.execute_cgi();
+		int ret = cgi.execute_cgi(this->_req);
 		if (ret < 0)
 			return (this->simple_response(500, "Internal Server Error", error[500]));
 		this->_body = cgi.get_body();	//read cgi execution's output
@@ -230,7 +230,7 @@ std::string HttpResponse::build_ressource_path() {
 			path.erase(0, 1);
 		path = this->_serv.get_location()[location].get_directory() + path;
 	}
-	std::cout << "----- DEBUG_PATH: " << path << std::endl;
+	// std::cout << "----- DEBUG_PATH: " << path << std::endl;
 	return (path); 
 }
 
@@ -321,7 +321,7 @@ void	HttpResponse::handle_post()
 
 	if (upload_path.empty())
 		return (this->simple_response(405, "Uploading file cannot be performed on this location", this->_serv.get_error_pages()[405]));
-	
+
 	if (!is_directory(upload_path.c_str()))
 		return (this->simple_response(500, "Internal Server Error", this->_serv.get_error_pages()[500]));
 
@@ -341,8 +341,8 @@ void	HttpResponse::handle_post()
 	return (this->simple_response(201, "Created"));
 }
 
-void	HttpResponse::handle_delete(){
-
+void	HttpResponse::handle_delete()
+{
 	std::string path = this->build_ressource_path();
 	if (std::remove(path.c_str()) == 0)
 		return (this->simple_response(204, "No Content"));
