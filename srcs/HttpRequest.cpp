@@ -6,6 +6,7 @@ HttpRequest::HttpRequest() :
 	_version(""),
 	_headers(),
 	_body(""),
+	_boundary(""),
 	_query_string(""),
 	_parsing_error_code(0)
 {}
@@ -25,7 +26,7 @@ void	HttpRequest::parse_request(char *buffer)
 	}
 
 	// DEBUG("RAW HEADER = [" + raw_input.substr(0, split_pos) + "]")
-	// DEBUG("RAW BODY = [" + raw_input.substr(split_pos + strlen("\r\n\r\n"), raw_input.length()) + "]")
+	// DEBUG("RAW BODY = [" + raw_input.substr(split_pos + strlen("\r\n\r\n")) + "]")
 	this->parse_headers(raw_input.substr(0, split_pos));
 	this->parse_body(raw_input.substr(split_pos + strlen("\r\n\r\n"), raw_input.length()));
 	this->parse_url(this->get_url());
@@ -33,10 +34,10 @@ void	HttpRequest::parse_request(char *buffer)
 	if (this->get_headers().count("Content-Type") && this->get_headers().at("Content-Type").find("multipart") != std::string::npos)
 	{
 		std::string content_type = this->get_headers().at("Content-Type");
-		size_t pos = content_type.find("boundary") + strlen("boundary");
+		size_t pos = content_type.find("boundary=") + strlen("boundary=");
 		std::string tmp = content_type.substr(pos);
-		DEBUG("BOUNDARY SRTING= [" + tmp + "]")
-		// _boundary = ltrim(tmp, "-");
+		// DEBUG("BOUNDARY SRTING= [" + tmp + "]")
+		_boundary = tmp;
 	}
 	
 	this->print();

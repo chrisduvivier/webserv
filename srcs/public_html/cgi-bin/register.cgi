@@ -30,7 +30,7 @@ def main():
 	if query_string and multiform and multiform.keys():
 		print('<h3> List of the FORM DATA passed to CGI </h3>')
 		for key in multiform.keys():
-			print('<p>' + key + '=' + str(multiform[key]) + '</p>')
+			print('<p>' + key + ' = ' + str(multiform[key][0]) + '</p>')
 	else:
 		print('<h3> FORM DATA passed to CGI was empty! </h3>')
 	print('</body>')

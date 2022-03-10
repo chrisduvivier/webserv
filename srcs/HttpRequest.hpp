@@ -24,6 +24,7 @@ class HttpRequest
 			this->_version = copy._version;
 			this->_headers = copy._headers;
 			this->_body = copy._body;
+			this->_boundary = copy._boundary;
 			this->_query_string = copy._query_string;
 			this->_parsing_error_code = copy._parsing_error_code;
 		}
@@ -38,6 +39,7 @@ class HttpRequest
 				this->_version = rhs._version;
 				this->_headers = rhs._headers;
 				this->_body = rhs._body;
+				this->_boundary = rhs._boundary;
 				this->_query_string = rhs._query_string;
 				this->_parsing_error_code = rhs._parsing_error_code;
 			}
@@ -67,6 +69,7 @@ class HttpRequest
 		std::string                                     _version;
 		std::map<std::string, std::string>   			_headers;
 		std::string										_body;
+		std::string										_boundary;
 		std::string										_query_string;
 		int												_parsing_error_code;
 };
