@@ -226,7 +226,10 @@ std::string HttpResponse::build_ressource_path() {
 	{
 		size_t to_erase = location.length();
 		path.erase(0, to_erase + 1);
-		path = this->_serv.get_location()[location].get_redirection() + path;
+		if (this->_serv.get_location()[location].get_redirection() != "/")
+			path = this->_serv.get_location()[location].get_redirection() + "/" + path;
+		else
+			path = this->_serv.get_location()[location].get_redirection() + path;
 	}
 	else
 	{
