@@ -155,9 +155,7 @@ int	HttpResponse::check_redirection() {
 	std::string location = this->get_location();
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (this->check_max_body_size());
-	
-	DEBUG("I'm in redirection check ");
-	DEBUG("http://localhost:" + itostr(_serv.get_port()) + this->build_ressource_path());
+
 	this->_headers["Location"] = "http://localhost:" + itostr(_serv.get_port()) + this->build_ressource_path();
 	return (301);
 }
