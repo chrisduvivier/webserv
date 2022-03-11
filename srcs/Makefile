@@ -9,6 +9,7 @@ SRCS_SERVER		=	main_server.cpp	\
 					ServerConfig.cpp\
 					Cgi.cpp\
 					ConfigFile.cpp\
+					Cluster.cpp\
 
 SRCS_CLIENT		=	main_client.cpp	\
 					SimpleSocket.cpp ClientSocket.cpp \

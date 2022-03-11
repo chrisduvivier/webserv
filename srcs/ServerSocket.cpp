@@ -61,10 +61,11 @@ void	ServerSocket::setConf(ServerConfig conf)
 **  "send" with a zero flags argument is equivalent to write(2).
 **	send doesn't always send all the bytes requested, it has to be used in a loop to ensure that all the data is correctly sent.
 */
-int	handle_connection(int client_sock, ServerConfig conf)
+int	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 {
 	int			ret = 0;
 	char		buffer[REQUEST_READ_BUFFER];
+	HttpRequest client_request;
 	std::string	response;
 
 	bzero(&buffer, REQUEST_READ_BUFFER);
@@ -72,16 +73,35 @@ int	handle_connection(int client_sock, ServerConfig conf)
 	if (ret < 0)
 		throw ServerException("Exception: Couldn't read from client socket");
 
-	HttpRequest client_request;
 	client_request.parse_request(buffer);
 	HttpResponse http_response(client_request, conf);
 	http_response.build_response();
 	response = http_response.get_response();
+	
+	// insert to map
+	if (_cluster._response_queue.find(client_sock) == _cluster._response_queue.end())	//dont exists
+	{
+		//create vector with 1 string inside for initilaization
+		std::vector<std::string> tmp;
+		tmp.push_back(response);
+		_cluster._response_queue.insert(std::pair<int, std::vector<std::string> >(client_sock, tmp));
+	}
+	else
+		_cluster._response_queue.find(client_sock)->second.push_back(response);
+	return (0);
+}
 
-	size_t 		response_size = response.length();
+
+int	ServerSocket::send_response(int client_sock)
+{	
+	if (_cluster._response_queue.find(client_sock) == _cluster._response_queue.end())
+		return (0);
+	std::string response = _cluster._response_queue.find(client_sock)->second.back();
+	_cluster._response_queue.find(client_sock)->second.pop_back();							//remove from vector
+	size_t response_size = response.length();
+	
 	int			bytes_sent;
 	const char 	*bytes_to_send = static_cast<const char *>(response.c_str());
-
 	while (response_size > 0)
 	{
 		bytes_sent = send(client_sock, bytes_to_send, response_size, 0);
@@ -99,8 +119,9 @@ int	handle_connection(int client_sock, ServerConfig conf)
 int ServerSocket::run()
 {
 	fd_set		current_sockets;
-	fd_set		ready_sockets;
-	int			y = 0;
+	fd_set		read_sockets;		// Also checked for new established connection
+	fd_set		write_sockets;
+	bool		new_connection = false;
 	std::vector<SimpleSocket>::iterator sock_iter = _socket_vector.begin();
 
 	// initialize my current set
@@ -114,24 +135,24 @@ int ServerSocket::run()
 	DEBUG("+++++++ Server is Listening ++++++++");
 	while (true)
 	{
-		ready_sockets = current_sockets;	//because select is destructive
+		read_sockets = current_sockets;
+		write_sockets = current_sockets;
+
 		struct timeval	timeout;			//for timeout
 		timeout.tv_sec = 3;
 		timeout.tv_usec = 0;
-		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, &timeout) < 0)
+		if (select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, &timeout) < 0)
 		{
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
-		for (int i=0; i < FD_SETSIZE; i++)
+		for (int i=0; i < FD_SETSIZE; i++)		//TODO: possible improvement
 		{
-			sock_iter = _socket_vector.begin();
-			y = 0;
-			if (FD_ISSET(i, &ready_sockets))							//tests if fd i is in the set => ready for reading.
+			new_connection = false;									//reset
+			if (FD_ISSET(i, &read_sockets))							//tests if fd i is in the set => ready for reading.
 			{
-				while (sock_iter != _socket_vector.end())
+				for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
 				{
-					y = 0;
 					if (i == sock_iter->get_sock())						//new connection is established
 					{
 						int client_socket;
@@ -142,33 +163,54 @@ int ServerSocket::run()
 						}
 						FD_SET(client_socket, &current_sockets);
 						sock_iter->_client.push_back(client_socket);	// remember the client so we can id which server is linked to
-						y = 1; 								// signal to tell its a new connection 
+						new_connection = true; 								// signal to tell its a new connection 
 						break ;
 					}
-					sock_iter++;
 				}
-				if (y != 1)
+	
+				if (new_connection == false)
 				{
-					sock_iter = _socket_vector.begin();
-					y = 0;
-					while (sock_iter != _socket_vector.end())
+					//check if read is ready
+					if (FD_ISSET(i, &read_sockets))
 					{
-						if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
-							break ;
-						y++;
-						sock_iter++;
+						int server_num = 0;					// find which server (in the list sock_iter->_client) contains the fd ready to be handled
+						for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
+						{
+							if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
+								break ;
+							server_num++;
+						}
+						try {
+							handle_connection(i, _conf_vector[server_num]); // main function to handle requests
+						} catch (std::exception &e) {
+							std::cout << e.what() << std::endl;
+						}
 					}
-					try {
-						handle_connection(i, _conf_vector[y]); // main function to handle requests
-					} catch (std::exception &e) {
-						std::cout << e.what() << std::endl;
+
+					if (FD_ISSET(i, &write_sockets))
+					{
+						try {
+							send_response(i);
+							for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
+							{
+								if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
+								{
+									sock_iter->_client.erase(std::remove(sock_iter->_client.begin(), sock_iter->_client.end(), i), sock_iter->_client.end()); //remove client
+									break ;
+								}
+							}
+						} catch (std::exception &e) {
+							std::cout << e.what() << std::endl;
+						}
 					}
-					sock_iter->_client.erase(std::remove(sock_iter->_client.begin(), sock_iter->_client.end(), i), sock_iter->_client.end()); //remove client
+
 					close(i);
 					FD_CLR(i, &current_sockets);
 				}
 			}
 		}
+
+		
 	}
 	return (0);	//should never quit
 }
