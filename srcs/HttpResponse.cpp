@@ -155,7 +155,7 @@ int	HttpResponse::check_redirection() {
 	std::string location = this->get_location();
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (this->check_max_body_size());
-	
+
 	this->_headers["Location"] = "http://localhost:" + itostr(_serv.get_port()) + this->build_ressource_path();
 	return (301);
 }
@@ -224,7 +224,10 @@ std::string HttpResponse::build_ressource_path() {
 	{
 		size_t to_erase = location.length();
 		path.erase(0, to_erase + 1);
-		path = this->_serv.get_location()[location].get_redirection() + path;
+		if (this->_serv.get_location()[location].get_redirection() != "/")
+			path = this->_serv.get_location()[location].get_redirection() + "/" + path;
+		else
+			path = this->_serv.get_location()[location].get_redirection() + path;
 	}
 	else
 	{
@@ -238,7 +241,6 @@ std::string HttpResponse::build_ressource_path() {
 			path.erase(0, 1);
 		path = this->_serv.get_location()[location].get_directory() + path;
 	}
-	// std::cout << "----- DEBUG_PATH: " << path << std::endl;
 	return (path); 
 }
 
