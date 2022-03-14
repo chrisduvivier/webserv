@@ -125,6 +125,15 @@ int HttpResponse::check_method()
 	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
 		return (400);
 
+	if (method == "POST")
+	{
+		std::cout << "B-L: " << this->_req.get_body().length() << "C-L: " << atoi(headers["Content-Length"].c_str()) << std::endl;
+		if (headers["Content-Type"].empty() || headers["Content-Length"].empty())
+			return (400);
+		else if (this->_req.get_body().length() != static_cast<size_t>(atoi(headers["Content-Length"].c_str())))
+			return (400);
+	}
+
 	std::string location = this->get_location();
 	std::vector<std::string> allowed_method;
 	allowed_method = _serv.get_location()[location].get_method();
