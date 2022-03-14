@@ -122,12 +122,8 @@ int HttpResponse::check_method()
 		return (501);
 
 	std::map<std::string, std::string> headers = _req.get_headers();
-	if (method == "POST" && (headers["Content-Type"].empty() || headers["Content-Length"].empty()))
-		return (400);
-
 	if (method == "POST")
 	{
-		std::cout << "B-L: " << this->_req.get_body().length() << "C-L: " << atoi(headers["Content-Length"].c_str()) << std::endl;
 		if (headers["Content-Type"].empty() || headers["Content-Length"].empty())
 			return (400);
 		else if (this->_req.get_body().length() != static_cast<size_t>(atoi(headers["Content-Length"].c_str())))
