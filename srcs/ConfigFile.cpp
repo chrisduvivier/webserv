@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFile.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rlinkov <rlinkov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/03 15:33:18 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/10 17:22:32 by rlinkov          ###   ########.fr       */
+/*   Updated: 2022/03/14 15:18:40 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,7 +273,7 @@ void	ConfigFile::client_max_body_size(int x)
 	int	i = keyword("client_max_body_size", _server[x], 0);
 	if (i == (int)std::string::npos)
 	{
-		_client_max_body_size[x] = "1";
+		_client_max_body_size[x] = "1000";
 		return ;
 	}
 	i += 20;

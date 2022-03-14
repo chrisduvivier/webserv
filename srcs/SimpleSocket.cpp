@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   SimpleSocket.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/14 15:32:11 by ldavids           #+#    #+#             */
+/*   Updated: 2022/03/14 15:32:14 by ldavids          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "SimpleSocket.hpp"
 
 /* Constructor */
@@ -9,8 +21,10 @@ SimpleSocket::SimpleSocket(int port, std::string ip, int domain, int service, in
 	// define address structure
 	_address.sin_family = domain;
 	// Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, ip.c_str(), &_address.sin_addr.s_addr) <= 0)
-        error_exit("Invalid address / Address not supported \n");
+	if (inet_pton(AF_INET, ip.c_str(), &_address.sin_addr.s_addr) <= 0)
+	{
+		error_exit("Invalid address / Address not supported \n");
+	}
 	_address.sin_port = htons(port);
 
 	// Establish socket
