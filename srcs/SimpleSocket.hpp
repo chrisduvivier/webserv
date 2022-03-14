@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SimpleSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
+/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/14 15:32:29 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/14 15:32:31 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/03/14 16:50:55 by cduvivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class SimpleSocket
 		struct sockaddr_in  _address;
 		int                 _sock;
 		int                 _connection;
+		int                 _option_buffer;
 };
 
 #endif

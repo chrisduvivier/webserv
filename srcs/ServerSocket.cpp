@@ -165,9 +165,9 @@ int ServerSocket::run()
 							handle_connection(i, _conf_vector[server_num]); // main function to handle requests
 						} catch (std::exception &e) {
 							std::cout << e.what() << std::endl;
-							// close(i);										//remove client
-							// FD_CLR(i, &current_sockets);
-							// continue ;
+							close(i);										//remove client and pass to next fd
+							FD_CLR(i, &current_sockets);
+							continue ;
 						}
 					}
 
@@ -187,7 +187,6 @@ int ServerSocket::run()
 							std::cout << e.what() << std::endl;
 						}
 					}
-
 					close(i);
 					FD_CLR(i, &current_sockets);
 				}

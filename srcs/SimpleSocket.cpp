@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SimpleSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
+/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/14 15:32:11 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/14 15:32:14 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/03/14 16:52:14 by cduvivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ SimpleSocket::SimpleSocket(int port, std::string ip, int domain, int service, in
 
 	// Establish socket
 	_sock = establish_socket(domain, service, protocol);
+
+	setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &_option_buffer, sizeof(_option_buffer));
 }
 
 int	SimpleSocket::establish_socket(int domain, int service, int protocol)
