@@ -17,12 +17,13 @@ HttpRequest::HttpRequest() :
 */
 void	HttpRequest::parse_request(char *buffer)
 {
-	std::string raw_input(buffer);
-	size_t split_pos;
+	std::string 	raw_input(buffer);
+	size_t 			split_pos;
 	if ((split_pos = raw_input.find("\r\n\r\n")) == std::string::npos)
 	{
 		this->_parsing_error_code = 400;
-		throw ServerException("Exception HttpRequest: invalid request - Couldn't find header/body seperator");
+		return ;
+		// throw ServerException("Exception HttpRequest: invalid request - Couldn't find header/body seperator");
 	}
 
 	// DEBUG("RAW HEADER = [" + raw_input.substr(0, split_pos) + "]")

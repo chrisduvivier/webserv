@@ -19,7 +19,8 @@ ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int servi
 		try {
       	  init(temp.get_sock(), temp.get_address());
    		} catch (std::exception& e) {
-			std::cout << e.what() << std::endl;
+			std::cerr << e.what() << std::endl;
+			std::cerr << "server SETUP failed, exiting webserv...\n";
 			exit(1);
 		}
 		i++;
@@ -31,9 +32,9 @@ void    ServerSocket::init(int sock, struct sockaddr_in address)
 	// set socket as non blocking
 	fcntl(sock, F_SETFL, O_NONBLOCK);
 	if (bind(sock, (struct sockaddr *)&address, sizeof(address)) < 0)
-		throw ServerException("Error: Error bind socket");
+		throw ServerException("Error ServerSocket: Error bind socket");
 	if (listen(sock, BACKLOG_LEN) < 0)
-		throw ServerException("Error: Failed to listen socket");
+		throw ServerException("Error ServerSocket: Failed to listen socket");
 }
 
 /*
@@ -48,13 +49,14 @@ void	ServerSocket::setConf(ServerConfig conf)
 **	Read the request and create answer associated with the client socket number.
 **	The result to e sent is store in a map `Cluster`
 */
-int	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
+void	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 {
 	int			ret = 0;
 	char		buffer[REQUEST_READ_BUFFER];
 	HttpRequest client_request;
 	std::string	response;
 
+	usleep(1500);
 	bzero(&buffer, REQUEST_READ_BUFFER);
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
 	if (ret < 0)
@@ -74,7 +76,6 @@ int	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 	}
 	else
 		_cluster._response_queue.find(client_sock)->second.push_back(response);
-	return (0);
 }
 
 /*
@@ -89,7 +90,7 @@ int	ServerSocket::send_response(int client_sock)
 	
 	int	res = send(client_sock, response.c_str(), response_size, 0);
 	if (res < 0)
-		throw ServerException("Exception: Error while sending response to client");
+		throw ServerException("Exception: Error send: failed to send response to client");
 	_cluster._response_queue.find(client_sock)->second.pop_back();		//remove response only after successful send
 	return (0);
 }
@@ -127,14 +128,14 @@ int ServerSocket::run()
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
-		for (int i=0; i < FD_SETSIZE; i++)		//TODO: possible improvement
+		for (int i=0; i < FD_SETSIZE; i++)									//TODO: possible improvement
 		{
-			new_connection = false;									//reset
-			if (FD_ISSET(i, &read_sockets))							//tests if fd i is in the set => ready for reading.
+			new_connection = false;											//reset
+			if (FD_ISSET(i, &read_sockets))									//tests if fd i is in the set => ready for reading.
 			{
 				for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
 				{
-					if (i == sock_iter->get_sock())						//new connection is established
+					if (i == sock_iter->get_sock())							//new connection is established
 					{
 						int client_socket;
 						if ((client_socket = accept(i, NULL, NULL)) < 0)
@@ -143,7 +144,7 @@ int ServerSocket::run()
 							return (-1);
 						}
 						FD_SET(client_socket, &current_sockets);
-						sock_iter->_client.push_back(client_socket);	// remember the client so we can id which server is linked to
+						sock_iter->_client.push_back(client_socket);		// remember the client so we can id which server is linked to
 						new_connection = true; 								// signal to tell its a new connection 
 						break ;
 					}
@@ -151,10 +152,9 @@ int ServerSocket::run()
 	
 				if (new_connection == false)
 				{
-					//check if read is ready
-					if (FD_ISSET(i, &read_sockets))
+					if (FD_ISSET(i, &read_sockets))							//read is ready
 					{
-						int server_num = 0;					// find which server (in the list sock_iter->_client) contains the fd ready to be handled
+						int server_num = 0;									// find which server (in the list sock_iter->_client) contains the fd ready to be handled
 						for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
 						{
 							if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
@@ -165,6 +165,9 @@ int ServerSocket::run()
 							handle_connection(i, _conf_vector[server_num]); // main function to handle requests
 						} catch (std::exception &e) {
 							std::cout << e.what() << std::endl;
+							// close(i);										//remove client
+							// FD_CLR(i, &current_sockets);
+							// continue ;
 						}
 					}
 

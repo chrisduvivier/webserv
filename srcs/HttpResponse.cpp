@@ -1,18 +1,16 @@
 #include "HttpResponse.hpp"
 
-HttpResponse::HttpResponse() : _protocol("HTTP/1.1") {}
+HttpResponse::HttpResponse() : _protocol("HTTP/1.1")
+{
+}
 
-HttpResponse::HttpResponse(HttpRequest request, ServerConfig serv) : _protocol("HTTP/1.1") {
-	
+HttpResponse::HttpResponse(HttpRequest request, ServerConfig serv) : _protocol("HTTP/1.1")
+{
 	this->_req = request;
 	this->_serv = serv;
 }
 
-
-std::string	HttpResponse::get_response() {
-
-	return (this->_response);
-}
+std::string HttpResponse::get_response() { return (this->_response); }
 
 /*
 	--
@@ -20,26 +18,26 @@ std::string	HttpResponse::get_response() {
 		understandable for the client
 	--
 */
-std::string	HttpResponse::construct_response() {
-
+std::string HttpResponse::construct_response()
+{
 	std::stringstream tmp;
 	std::string response;
 
 	tmp << this->_protocol << " " << this->_status_code << " " << this->_status_text << "\r\n"; // first line
 
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it) // add Headers
-    	tmp << it->first << ": " << it->second << "\r\n";
+		tmp << it->first << ": " << it->second << "\r\n";
 
-	tmp << "\r\n" << this->_body; // add delimiter between headers and body. 
+	tmp << "\r\n" << this->_body; // add delimiter between headers and body.
 	response = tmp.str();
 	return (response);
 }
 
-void	HttpResponse::print() const {
-
+void HttpResponse::print() const
+{
 	std::cout << "----- HTTP RESPONSE -----\n";
 	std::cout << this->_protocol << " " << this->_status_code << " " << this->_status_text << std::endl;
-	for(std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
+	for (std::map<std::string, std::string>::const_iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 	std::cout << "----- RESPONSE DONE -----\n\n";
 	/*std::cout << this->_body << std::endl;*/
@@ -54,7 +52,7 @@ void	HttpResponse::print() const {
 		error status code passed by request object
 	--
 */
-void	HttpResponse::build_response()
+void HttpResponse::build_response()
 {
 	std::map<int, std::string> error = _serv.get_error_pages();
 	int status_code;
@@ -63,7 +61,8 @@ void	HttpResponse::build_response()
 		status_code = this->_req.get_parsing_error_code();
 	else
 		status_code = this->check_method();
-	switch(status_code) {
+	switch (status_code)
+	{
 	case 301:
 		return (this->simple_response(301, "Moved Permanently"));
 	case 400:
@@ -85,13 +84,13 @@ void	HttpResponse::build_response()
 
 	if (extension == "cgi") //handling CGI
 	{
-		DEBUG("Call to CGI");
+		// DEBUG("Call to CGI");
 		Cgi cgi(this->_req, path, this->_serv);
 		int ret = cgi.execute_cgi(this->_req);
 		if (ret < 0)
 			return (this->simple_response(500, "Internal Server Error", error[500]));
-		this->_body = cgi.get_body();	//read cgi execution's output
-		
+		this->_body = cgi.get_body(); //read cgi execution's output
+
 		// header is added here manually for now
 		this->_headers["Content-Type"] = "text/html; charset=utf-8";
 		this->_headers["Content-Length"] = SSTR(this->_body.length());
@@ -105,7 +104,7 @@ void	HttpResponse::build_response()
 		return (this->handle_post());
 	else if (_req.get_method() == "DELETE")
 		return (this->handle_delete());
-	
+
 	return (this->simple_response(200, "OK", path));
 }
 
@@ -116,8 +115,8 @@ void	HttpResponse::build_response()
 		3. Check if method is allowed on location
 	--
 */
-int	HttpResponse::check_method() {
-
+int HttpResponse::check_method()
+{
 	std::string method = _req.get_method();
 	if (method != "POST" && method != "GET" && method != "DELETE")
 		return (501);
@@ -132,7 +131,7 @@ int	HttpResponse::check_method() {
 	std::string allow;
 	for (std::vector<std::string>::iterator it = allowed_method.begin(); it != allowed_method.end(); ++it)
 	{
-		if (it !=  allowed_method.begin())
+		if (it != allowed_method.begin())
 			allow += ", ";
 		allow += *it;
 	}
@@ -150,8 +149,9 @@ int	HttpResponse::check_method() {
 		another directory and complete the HttpReponse header with the new url in that case
 	--
 */
-int	HttpResponse::check_redirection() {
-	
+int HttpResponse::check_redirection()
+{
+
 	std::string location = this->get_location();
 	if (this->_serv.get_location()[location].get_redirection().empty())
 		return (this->check_max_body_size());
@@ -165,8 +165,8 @@ int	HttpResponse::check_redirection() {
 		This function will verify the request body does not exceed the size specified in the conf file
 	--
 */
-int	HttpResponse::check_max_body_size() {
-
+int HttpResponse::check_max_body_size()
+{
 	size_t client_max_size = (size_t)this->_serv.get_client_max_body_size();
 	if (client_max_size != 0 && client_max_size < this->_req.get_body().length())
 		return (413);
@@ -178,8 +178,8 @@ int	HttpResponse::check_max_body_size() {
 		This function will verify that the ressource requested exists
 	--
 */
-int	HttpResponse::check_url_exists() {
-
+int HttpResponse::check_url_exists()
+{
 	std::string path = this->build_ressource_path();
 
 	std::ifstream ifs(path.c_str());
@@ -194,7 +194,8 @@ int	HttpResponse::check_url_exists() {
 		rules to correctly treat the requested ressource
 	--
 */
-std::string	HttpResponse::get_location() {
+std::string HttpResponse::get_location()
+{
 
 	std::string location = this->_req.get_url();
 	std::map<std::string, Location> conf_location = this->_serv.get_location();
@@ -216,8 +217,8 @@ std::string	HttpResponse::get_location() {
 		that is requested by the client
 	--
 */
-std::string HttpResponse::build_ressource_path() {
-
+std::string HttpResponse::build_ressource_path()
+{
 	std::string path = this->_req.get_url();
 	std::string location = this->get_location();
 	if (!this->_serv.get_location()[location].get_redirection().empty())
@@ -241,27 +242,24 @@ std::string HttpResponse::build_ressource_path() {
 			path.erase(0, 1);
 		path = this->_serv.get_location()[location].get_directory() + path;
 	}
-	return (path); 
+	return (path);
 }
 
-void	HttpResponse::simple_response(int code, std::string status) {
-
-	this->_protocol = "HTTP/1.1";
+void HttpResponse::simple_response(int code, std::string status)
+{
 	this->_status_code = code;
 	this->_status_text = status;
 	this->_response = this->construct_response();
 }
 
-void	HttpResponse::simple_response(int code, std::string status, std::string path) {
-
+void HttpResponse::simple_response(int code, std::string status, std::string path)
+{
 	std::ifstream resource(path.c_str());
+	std::stringstream buff;
 
-	this->_protocol = "HTTP/1.1";
 	this->_status_code = code;
 	this->_status_text = status;
-
 	this->_headers["Content-Type"] = ContentTypeList()[path.substr(path.find('.', 1) + 1)];
-	std::stringstream buff;
 	buff << resource.rdbuf();
 	resource.close();
 	this->_body = buff.str();
@@ -270,21 +268,21 @@ void	HttpResponse::simple_response(int code, std::string status, std::string pat
 	this->_response = this->construct_response();
 }
 
-void	HttpResponse::directory_response() {
-
-	// std::cout << "directory_response IN" << std::endl;
+void HttpResponse::directory_response()
+{
+	// DEBUG("directory_response IN");
 	std::string location = this->get_location();
 
 	if (_serv.get_location()[location].get_listing())
 	{
 		/* --- building 'Index of' HTML page -- */
 
-		std::cout << "directory_response Listing 1" << std::endl;
+		// DEBUG("directory_response Listing 1");
 		DIR *dp;
 		struct dirent *ep;
 		std::string body;
 
-		dp = opendir (this->build_ressource_path().c_str());
+		dp = opendir(this->build_ressource_path().c_str());
 		if (dp != NULL)
 		{
 			std::string url = this->_req.get_url();
@@ -293,17 +291,17 @@ void	HttpResponse::directory_response() {
 			body = body + "<!DOCTYPE html>\n<html>\n <body>\n  <h1>Index of " + url + "</h1>\n";
 			body = body + "   <p>		______________________________________________________________________________________		</p>\n";
 			body = body + "   </br></br></br>";
-			while ((ep = readdir (dp)))
+			while ((ep = readdir(dp)))
 			{
 				body = body + "  <a href=\"http://localhost:" + itostr(_serv.get_port()) + url + ep->d_name + "\">" + ep->d_name + "</a></br>";
 				body += '\n';
 			}
 			body += " </body>\n</html>";
 			if ((closedir(dp) == -1))
-				return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
+				return (this->simple_response(500, "Internal Server Error", _serv.get_error_pages()[500]));
 		}
 		else
-			return (this->simple_response(500, "Internal Server Error",  _serv.get_error_pages()[500]));
+			return (this->simple_response(500, "Internal Server Error", _serv.get_error_pages()[500]));
 
 		this->_protocol = "HTTP/1.1";
 		this->_status_code = 200;
@@ -313,7 +311,7 @@ void	HttpResponse::directory_response() {
 		int body_size = this->_body.length();
 		this->_headers["Content-Length"] = SSTR(body_size);
 		this->_response = this->construct_response();
-		return ;
+		return;
 	}
 
 	if (!_serv.get_location()[location].get_default_file().empty())
@@ -324,7 +322,7 @@ void	HttpResponse::directory_response() {
 	return (this->simple_response(200, "OK"));
 }
 
-void	HttpResponse::handle_post()
+void HttpResponse::handle_post()
 {
 	std::string location = this->get_location();
 	std::string upload_path = _serv.get_location()[location].get_upload_path();
@@ -351,7 +349,7 @@ void	HttpResponse::handle_post()
 	return (this->simple_response(201, "Created"));
 }
 
-void	HttpResponse::handle_delete()
+void HttpResponse::handle_delete()
 {
 	std::string path = this->build_ressource_path();
 	if (std::remove(path.c_str()) == 0)

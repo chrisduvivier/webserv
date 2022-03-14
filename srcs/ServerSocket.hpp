@@ -39,7 +39,7 @@ class ServerSocket
 		int					run();
 		void				setConf(ServerConfig conf);
 		int					establish_socket(int domain, int service, int protocol);
-		int					handle_connection(int client_sock, ServerConfig conf);
+		void				handle_connection(int client_sock, ServerConfig conf);
 		int					send_response(int client_sock);
 
 	private:
