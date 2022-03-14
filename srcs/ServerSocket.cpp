@@ -1,20 +1,17 @@
 # include "ServerSocket.hpp"
 
-ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int service, int protocol)
+ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int service, int protocol) : 
+	_conf_vector(conf)
 {
-	int i = 0;
-
-	std::vector<ServerConfig>::iterator it1 = conf.begin();
-	std::vector<ServerConfig>::iterator it2 = conf.end();
-	_conf_vector = conf;
 	std::string ip;
+	int i = 0;
 	int port;
 
 	// iterate through serverconf vector to initialize sockets and push them in socket_vector
-	while (it1 != it2) 
+	for (std::vector<ServerConfig>::iterator iter_server = conf.begin(); iter_server != conf.end(); iter_server++) 
 	{
-		ip = ip_to_string(it1->get_host());
-		port = it1->get_port();
+		ip = ip_to_string(iter_server->get_host());
+		port = iter_server->get_port();
 		std::cout << "Server number " << i << " : port is " << port << std::endl;
 		std::cout << "Server number " << i << " : ip is " << ip << std::endl;
 		SimpleSocket temp(port, ip, domain, service, protocol);
@@ -25,7 +22,6 @@ ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int servi
 			std::cout << e.what() << std::endl;
 			exit(1);
 		}
-		it1++;
 		i++;
 	}
 }
@@ -34,22 +30,14 @@ void    ServerSocket::init(int sock, struct sockaddr_in address)
 {
 	// set socket as non blocking
 	fcntl(sock, F_SETFL, O_NONBLOCK);
-
 	if (bind(sock, (struct sockaddr *)&address, sizeof(address)) < 0)
-	{
 		throw ServerException("Error: Error bind socket");
-	}
-
 	if (listen(sock, BACKLOG_LEN) < 0)
-	{
 		throw ServerException("Error: Failed to listen socket");
-	}
 }
 
 /*
-	--
-		Associate a configuration file to the server
-	--
+**	Associate a configuration file to the server
 */
 void	ServerSocket::setConf(ServerConfig conf)
 {
@@ -57,9 +45,8 @@ void	ServerSocket::setConf(ServerConfig conf)
 }
 
 /*
-**	Read the request and handle appropriate result
-**  "send" with a zero flags argument is equivalent to write(2).
-**	send doesn't always send all the bytes requested, it has to be used in a loop to ensure that all the data is correctly sent.
+**	Read the request and create answer associated with the client socket number.
+**	The result to e sent is store in a map `Cluster`
 */
 int	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 {
@@ -72,7 +59,6 @@ int	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
 	if (ret < 0)
 		throw ServerException("Exception: Couldn't read from client socket");
-
 	client_request.parse_request(buffer);
 	HttpResponse http_response(client_request, conf);
 	http_response.build_response();
@@ -91,25 +77,20 @@ int	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 	return (0);
 }
 
-
+/*
+**	Find the response to the client (client_socket) from cluster and send it.
+*/
 int	ServerSocket::send_response(int client_sock)
 {	
 	if (_cluster._response_queue.find(client_sock) == _cluster._response_queue.end())
 		return (0);
 	std::string response = _cluster._response_queue.find(client_sock)->second.back();
-	_cluster._response_queue.find(client_sock)->second.pop_back();							//remove from vector
 	size_t response_size = response.length();
 	
-	int			bytes_sent;
-	const char 	*bytes_to_send = static_cast<const char *>(response.c_str());
-	while (response_size > 0)
-	{
-		bytes_sent = send(client_sock, bytes_to_send, response_size, 0);
-		if (bytes_sent < 0)
-			throw ServerException("Exception: Error while sending response to client");
-		bytes_to_send += bytes_sent;
-		response_size -= bytes_sent;
-	}
+	int	res = send(client_sock, response.c_str(), response_size, 0);
+	if (res < 0)
+		throw ServerException("Exception: Error while sending response to client");
+	_cluster._response_queue.find(client_sock)->second.pop_back();		//remove response only after successful send
 	return (0);
 }
 

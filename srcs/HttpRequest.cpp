@@ -40,7 +40,8 @@ void	HttpRequest::parse_request(char *buffer)
 		_boundary = tmp;
 	}
 	
-	this->print();
+	// this->print();
+	DEBUG("method: " + this->get_method() + "	url = " + this->get_url());
 }
 
 // populate map headers from reading raw header string

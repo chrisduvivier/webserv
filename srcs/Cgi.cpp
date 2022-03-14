@@ -83,7 +83,7 @@ void	Cgi::set_env()
 	_env[12] = strcat("SERVER_PORT=", 		_SERVER_PORT);
 	_env[13] = strcat("SERVER_SOFTWARE=", 	_SERVER_SOFTWARE);
 	_env[14] = NULL;
-	print_env();
+	// print_env();
 }
 
 void	Cgi::free_env()
@@ -145,13 +145,16 @@ int     Cgi::execute_cgi(HttpRequest request)
 		exit(0);
 	}
 	
+	int res = 0;
 	// write the body of the request to the stdIN of cgi
 	if (request.get_method() == "POST")
 	{
-		std::cout << "Parent process write to cgi: string=[" << request.get_body().c_str() << "] with length=[" << request.get_body().length() << "]\n";
-		int res = write(fd_pipe[1], request.get_body().c_str(), request.get_body().length());
-		std::cout << "result of write = [" << res << "]\n";
-
+		res = write(fd_pipe[1], request.get_body().c_str(), request.get_body().length());
+		if (res < 0)
+		{
+			std::cerr << RED << "Error: write to CGI stdin failed\n" << RESET;
+			return (res);
+		}
 	}
 	close(fd_pipe[1]);	//close write side
 
