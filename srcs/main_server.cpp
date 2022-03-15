@@ -1,10 +1,20 @@
-#include "ServerSocket.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main_server.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/15 15:15:44 by cduvivie          #+#    #+#             */
+/*   Updated: 2022/03/15 15:15:50 by cduvivie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "Server.hpp"
 #include "ServerConfig.hpp"
 #include "ConfigFile.hpp"
 #include <vector>
 #include <string>
-
-# define PORT 8080
 
 # define DEFAULT_CONF "./conf/default.conf"
 
@@ -29,7 +39,7 @@ int main(int argc, char *argv[])
 	}
 
 	// create a server socket instance and run it
-	ServerSocket Server(Server_vector, AF_INET, SOCK_STREAM, 0);
+	Server Server(Server_vector, AF_INET, SOCK_STREAM, 0);
 
 	try {
 		Server.run();

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Cgi.cpp                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/15 15:00:08 by cduvivie          #+#    #+#             */
+/*   Updated: 2022/03/15 15:05:23 by cduvivie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Cgi.hpp"
 
 Cgi::Cgi(){
@@ -58,7 +70,7 @@ void    Cgi::set_var(HttpRequest request, std::string path_to_cgi, ServerConfig 
 		_QUERY_STRING = request.get_query_string();
 		_CONTENT_LENGTH = _QUERY_STRING.length();
 	}
-	_SERVER_NAME = "http://localhost";  //TODO: get from server config
+	_SERVER_NAME = "http://localhost";
 
 	/* set args for the execve */
 	_args[0] = strdup((char *)PYTHON_INTERPRETER);		//full path of Python3 interpreter
@@ -139,7 +151,7 @@ int     Cgi::execute_cgi(HttpRequest request)
 		close(fd_pipe[1]);
 		if (execve(PYTHON_INTERPRETER, _args, _env) < 0)
 		{
-			std::cerr << RED << "Error: CGI EXEC\n" << RESET;
+			std::cerr << RED << "Error execute_cgi: CGI exec failed\n" << RESET;
 			return (-1);
 		}
 		exit(0);
@@ -147,12 +159,12 @@ int     Cgi::execute_cgi(HttpRequest request)
 	
 	int res = 0;
 	// write the body of the request to the stdIN of cgi
-	if (request.get_method() == "POST")
+	if (request.get_method() == "POST" && request.get_body().length() > 0)
 	{
 		res = write(fd_pipe[1], request.get_body().c_str(), request.get_body().length());
-		if (res < 0)
+		if (res < 0 || res == 0)
 		{
-			std::cerr << RED << "Error: write to CGI stdin failed\n" << RESET;
+			std::cerr << RED << "Error execute_cgi: write to CGI stdin failed\n" << RESET;
 			return (res);
 		}
 	}
@@ -169,11 +181,16 @@ int     Cgi::execute_cgi(HttpRequest request)
 		memset(buffer, 0, BUFFER_SIZE);
 		ret = read(fd_pipe[0], buffer, BUFFER_SIZE);
 		if (ret < 0)
+		{
+			std::cerr << RED << "Error execute_cgi: read CGI output failed\n" << RESET;
 			return (-1);
-		_body += buffer;	
+		}
+		_body += buffer;
+		if (ret == 0)
+			break ;
 	}
 	if (dup2(fdin, STDIN_FILENO) < 0)
-		std::cerr << "Error: dup00\n";
+		std::cerr << RED << "Error execute_cgi: dup2 failed\n" << RESET;
 	close(fd_pipe[0]);
 	close(fdin);
 	return (ret);

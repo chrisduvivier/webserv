@@ -1,6 +1,18 @@
-# include "ServerSocket.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/15 15:10:03 by cduvivie          #+#    #+#             */
+/*   Updated: 2022/03/15 15:25:28 by ldavids          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int service, int protocol) : 
+# include "Server.hpp"
+
+Server::Server(std::vector<ServerConfig> conf, int domain, int service, int protocol) : 
 	_conf_vector(conf)
 {
 	std::string ip;
@@ -14,7 +26,7 @@ ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int servi
 		port = iter_server->get_port();
 		/*std::cout << "Server number " << i << " : port is " << port << std::endl;
 		std::cout << "Server number " << i << " : ip is " << ip << std::endl;*/
-		SimpleSocket temp(port, ip, domain, service, protocol);
+		Socket temp(port, ip, domain, service, protocol);
 		_socket_vector.push_back(temp);
 		try {
       	  init(temp.get_sock(), temp.get_address());
@@ -27,20 +39,20 @@ ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int servi
 	}
 }
 
-void    ServerSocket::init(int sock, struct sockaddr_in address)
+void    Server::init(int sock, struct sockaddr_in address)
 {
 	// set socket as non blocking
 	fcntl(sock, F_SETFL, O_NONBLOCK);
 	if (bind(sock, (struct sockaddr *)&address, sizeof(address)) < 0)
-		throw ServerException("Error ServerSocket: Error bind socket");
+		throw ServerException("Error Server: Error bind socket");
 	if (listen(sock, BACKLOG_LEN) < 0)
-		throw ServerException("Error ServerSocket: Failed to listen socket");
+		throw ServerException("Error Server: Failed to listen socket");
 }
 
 /*
 **	Associate a configuration file to the server
 */
-void	ServerSocket::setConf(ServerConfig conf)
+void	Server::setConf(ServerConfig conf)
 {
 	this->_conf = conf;
 }
@@ -49,7 +61,7 @@ void	ServerSocket::setConf(ServerConfig conf)
 **	Read the request and create answer associated with the client socket number.
 **	The result to e sent is store in a map `Cluster`
 */
-void	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
+void	Server::handle_connection(int client_sock, ServerConfig conf)
 {
 	int			ret = 0;
 	char		buffer[REQUEST_READ_BUFFER];
@@ -59,7 +71,7 @@ void	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 	usleep(1500);
 	bzero(&buffer, REQUEST_READ_BUFFER);
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
-	if (ret < 0)
+	if (ret < 0 || ret == 0)
 		throw ServerException("Exception: Couldn't read from client socket");
 	client_request.parse_request(buffer);
 	HttpResponse http_response(client_request, conf);
@@ -81,7 +93,7 @@ void	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 /*
 **	Find the response to the client (client_socket) from cluster and send it.
 */
-int	ServerSocket::send_response(int client_sock)
+int	Server::send_response(int client_sock)
 {	
 	if (_cluster._response_queue.find(client_sock) == _cluster._response_queue.end())
 		return (0);
@@ -89,15 +101,15 @@ int	ServerSocket::send_response(int client_sock)
 	size_t response_size = response.length();
 	
 	int	res = send(client_sock, response.c_str(), response_size, 0);
-	if (res < 0)
+	if (res < 0 || res == 0)
 		throw ServerException("Exception: Error send: failed to send response to client");
 	_cluster._response_queue.find(client_sock)->second.pop_back();		//remove response only after successful send
 	return (0);
 }
 
-void	ServerSocket::remove_client(int i)
+void	Server::remove_client(int i)
 {
-	std::vector<SimpleSocket>::iterator sock_iter;
+	std::vector<Socket>::iterator sock_iter;
 	
 	for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
 	{
@@ -118,14 +130,14 @@ void signalHandler(int i) {
 /*
 **
 */
-int ServerSocket::run()
+int Server::run()
 {
 	fd_set		current_sockets;
 	fd_set		read_sockets;		// Also checked for new established connection
 	fd_set		write_sockets;
 	bool		new_connection = false;
 	std::signal(SIGINT, signalHandler);
-	std::vector<SimpleSocket>::iterator sock_iter = _socket_vector.begin();
+	std::vector<Socket>::iterator sock_iter = _socket_vector.begin();
 
 	// initialize my current set
 	FD_ZERO(&current_sockets);

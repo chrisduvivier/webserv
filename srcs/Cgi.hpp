@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Cgi.hpp                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/15 15:00:19 by cduvivie          #+#    #+#             */
+/*   Updated: 2022/03/15 15:00:45 by cduvivie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef CGI_HPP
 # define CGI_HPP
 
@@ -30,12 +42,12 @@ class Cgi
 		~Cgi();
 		
 		//template for fork and execute the cgi birary
-		int     execute_cgi(HttpRequest request);
-		void    init_var();
-		void    set_var(HttpRequest request, std::string path_to_cgi, ServerConfig serv);
-		void	set_env();
-		void	free_env();
-		void	print_env();
+		int			execute_cgi(HttpRequest request);
+		void		init_var();
+		void		set_var(HttpRequest request, std::string path_to_cgi, ServerConfig serv);
+		void		set_env();
+		void		free_env();
+		void		print_env();
 		std::string get_body() const;
 
 	private:
