@@ -255,6 +255,7 @@ clear
 # DELETE Without Permission
 echo -e $Blue
 echo "Trying to DELETE protected pages is FORBIDDEN"
+echo -e $Color_Off
 
 sleep 1
 curl --verbose -X DELETE http://localhost:8050/error_pages/default_error.html
@@ -268,6 +269,7 @@ clear
 # Client MAX BODY SIZE
 echo -e $Blue
 echo "If the REQUEST exceeds CLIENT_MAX_BODY_SIZE, error is returned"
+echo -e $Color_Off
 
 sleep 1
 curl --verbose -d @../script/documents/websiteTooLarge.html -X POST http://localhost:8050/testupload.html  -H 'Expect:'
@@ -282,6 +284,7 @@ clear
 # UNKNOWN request
 echo -e $Blue
 echo "UNKNOWN request is forbidden, let's try PUT"
+echo -e $Color_Off
 
 sleep 1
 curl --verbose -X PUT http://localhost:8050/upload/testupload.html
@@ -329,5 +332,5 @@ echo -e $Color_Off
 sleep 3
 
 echo -e $On_Red
-read -n 1 -r -s -p $'END OF TESTER'
+echo 'END OF TESTER'
 echo -e $Color_Off
