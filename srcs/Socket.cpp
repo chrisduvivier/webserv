@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SimpleSocket.cpp                                   :+:      :+:    :+:   */
+/*   Socket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,10 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "SimpleSocket.hpp"
+#include "Socket.hpp"
 
 /* Constructor */
-SimpleSocket::SimpleSocket(int port, std::string ip, int domain, int service, int protocol)
+Socket::Socket(int port, std::string ip, int domain, int service, int protocol)
 {
 	// zero out everything first
 	bzero(&_address, sizeof(_address));
@@ -33,7 +33,7 @@ SimpleSocket::SimpleSocket(int port, std::string ip, int domain, int service, in
 	setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &_option_buffer, sizeof(_option_buffer));
 }
 
-int	SimpleSocket::establish_socket(int domain, int service, int protocol)
+int	Socket::establish_socket(int domain, int service, int protocol)
 {
 	int sock;
 	if ( (sock = socket(domain, service, protocol)) < 0 )
@@ -43,8 +43,8 @@ int	SimpleSocket::establish_socket(int domain, int service, int protocol)
 	return (sock);
 }
 
-// void	SimpleSocket::set_connection(int connection_id) { _connection = connection_id; }
+// void	Socket::set_connection(int connection_id) { _connection = connection_id; }
 
-struct sockaddr_in  SimpleSocket::get_address(void) { return _address; }
-int                 SimpleSocket::get_sock(void) { return _sock; }
-int                 SimpleSocket::get_connection(void) { return _connection; }
+struct sockaddr_in  Socket::get_address(void) { return _address; }
+int                 Socket::get_sock(void) { return _sock; }
+int                 Socket::get_connection(void) { return _connection; }

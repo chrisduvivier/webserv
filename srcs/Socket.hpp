@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SimpleSocket.hpp                                   :+:      :+:    :+:   */
+/*   Socket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SIMPLE_SOCKET_HPP
-# define SIMPLE_SOCKET_HPP
+#ifndef SOCKET_HPP
+# define SOCKET_HPP
 
 # include <string>
 # include <iostream>
@@ -27,11 +27,11 @@
 //	connections are refused.
 # define BACKLOG_LEN 3
 
-class SimpleSocket
+class Socket
 {
 	public:
 		//constructor
-		SimpleSocket(int port, std::string ip, int domain, int service, int protocol);
+		Socket(int port, std::string ip, int domain, int service, int protocol);
 
 		int	establish_socket(int domain, int service, int protocol);
 
