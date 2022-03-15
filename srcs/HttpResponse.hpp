@@ -6,7 +6,7 @@
 /*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 15:15:40 by cduvivie          #+#    #+#             */
-/*   Updated: 2022/03/15 15:15:41 by cduvivie         ###   ########.fr       */
+/*   Updated: 2022/03/15 16:14:07 by cduvivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ class HttpResponse
 
 		HttpResponse & operator = (const HttpResponse &rhs)
 		{
-			// TODO: deep copy this
 			if (this != &rhs)
 			{
 				this->_protocol = rhs._protocol;

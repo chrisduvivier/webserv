@@ -6,11 +6,11 @@
 #    By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/03/15 15:16:05 by cduvivie          #+#    #+#              #
-#    Updated: 2022/03/15 15:21:01 by cduvivie         ###   ########.fr        #
+#    Updated: 2022/03/15 15:57:57 by cduvivie         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SERVER_NAME		=	server.out
+SERVER_NAME		=	webserv
 
 SRCS_SERVER		=	main_server.cpp	\
 					Socket.cpp Server.cpp \

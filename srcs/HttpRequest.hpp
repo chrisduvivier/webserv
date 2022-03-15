@@ -6,7 +6,7 @@
 /*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 15:15:25 by cduvivie          #+#    #+#             */
-/*   Updated: 2022/03/15 15:15:29 by cduvivie         ###   ########.fr       */
+/*   Updated: 2022/03/15 16:14:04 by cduvivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ class HttpRequest
 
 		HttpRequest & operator = (const HttpRequest &rhs)
 		{
-			// TODO: deep copy this
 			if (this != &rhs)
 			{
 				this->_method = rhs._method;
