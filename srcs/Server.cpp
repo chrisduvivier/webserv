@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
+/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 15:10:03 by cduvivie          #+#    #+#             */
-/*   Updated: 2022/03/15 15:25:28 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/03/15 15:32:12 by cduvivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ void	Server::remove_client(int i)
 }
 
 void signalHandler(int i) {
-	std::cout << "Interrupt signal received.\n";
+	std::cout << YELLOW << "\nInterrupt signal received.\nExiting webserv\n\n" << RESET;
 	close(i);
 	exit(1);  
 }
