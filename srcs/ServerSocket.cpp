@@ -59,7 +59,7 @@ void	ServerSocket::handle_connection(int client_sock, ServerConfig conf)
 	usleep(1500);
 	bzero(&buffer, REQUEST_READ_BUFFER);
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
-	if (ret < 0)
+	if (ret < 0 || ret == 0)
 		throw ServerException("Exception: Couldn't read from client socket");
 	client_request.parse_request(buffer);
 	HttpResponse http_response(client_request, conf);
@@ -89,7 +89,7 @@ int	ServerSocket::send_response(int client_sock)
 	size_t response_size = response.length();
 	
 	int	res = send(client_sock, response.c_str(), response_size, 0);
-	if (res < 0)
+	if (res < 0 || res == 0)
 		throw ServerException("Exception: Error send: failed to send response to client");
 	_cluster._response_queue.find(client_sock)->second.pop_back();		//remove response only after successful send
 	return (0);
