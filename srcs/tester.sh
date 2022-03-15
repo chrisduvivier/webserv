@@ -197,7 +197,10 @@ echo -e $Blue
 echo "You can also delete files inside /upload directory."
 echo "We have prepared a file to delete, let's open it."
 sleep 1
-open http://localhost:8050/upload/deleteMe.html
+
+cp ./public_html/upload/deleteMe.html ./public_html/upload/deleteMe_copy.html
+
+open http://localhost:8050/upload/deleteMe_copy.html
 
 sleep 1
 echo -e $Blue
@@ -208,7 +211,7 @@ read -n 1 -r -s -p $'Press enter to continue'
 echo -e $Color_Off
 
 clear
-curl --verbose -X DELETE http://localhost:8050/upload/deleteMe.html
+curl --verbose -X DELETE http://localhost:8050/upload/deleteMe_copy.html
 
 sleep 1
 echo -e $Blue
@@ -237,7 +240,8 @@ clear
 
 # MULTIPLE SERVER NAME
 echo -e $Blue
-echo "Let's check different SERVER NAME"
+echo "Let's check different SERVER NAME with call to curl"
+echo -e $Color_Off
 
 sleep 1
 curl --resolve localhost:8050:127.0.0.1 localhost:8050
@@ -325,7 +329,5 @@ echo -e $Color_Off
 sleep 3
 
 echo -e $On_Red
-read -n 1 -r -s -p $'When you are done testing, press enter to kill webserv process'
+read -n 1 -r -s -p $'END OF TESTER'
 echo -e $Color_Off
-
-pkill webserv
