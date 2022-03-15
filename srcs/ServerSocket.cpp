@@ -12,8 +12,8 @@ ServerSocket::ServerSocket(std::vector<ServerConfig> conf, int domain, int servi
 	{
 		ip = ip_to_string(iter_server->get_host());
 		port = iter_server->get_port();
-		std::cout << "Server number " << i << " : port is " << port << std::endl;
-		std::cout << "Server number " << i << " : ip is " << ip << std::endl;
+		/*std::cout << "Server number " << i << " : port is " << port << std::endl;
+		std::cout << "Server number " << i << " : ip is " << ip << std::endl;*/
 		SimpleSocket temp(port, ip, domain, service, protocol);
 		_socket_vector.push_back(temp);
 		try {
@@ -95,6 +95,20 @@ int	ServerSocket::send_response(int client_sock)
 	return (0);
 }
 
+void	ServerSocket::remove_client(int i)
+{
+	std::vector<SimpleSocket>::iterator sock_iter;
+	
+	for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
+	{
+		if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
+		{
+			sock_iter->_client.erase(std::remove(sock_iter->_client.begin(), sock_iter->_client.end(), i), sock_iter->_client.end()); //remove client
+			break ;
+		}
+	}
+}
+
 /*
 **
 */
@@ -165,6 +179,7 @@ int ServerSocket::run()
 							handle_connection(i, _conf_vector[server_num]); // main function to handle requests
 						} catch (std::exception &e) {
 							std::cout << e.what() << std::endl;
+							remove_client(i);
 							close(i);										//remove client and pass to next fd
 							FD_CLR(i, &current_sockets);
 							continue ;
@@ -175,14 +190,7 @@ int ServerSocket::run()
 					{
 						try {
 							send_response(i);
-							for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
-							{
-								if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
-								{
-									sock_iter->_client.erase(std::remove(sock_iter->_client.begin(), sock_iter->_client.end(), i), sock_iter->_client.end()); //remove client
-									break ;
-								}
-							}
+							remove_client(i);
 						} catch (std::exception &e) {
 							std::cout << e.what() << std::endl;
 						}
