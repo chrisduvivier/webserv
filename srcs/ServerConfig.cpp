@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ServerConfig.cpp                                   :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/08 12:18:06 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/01 16:57:09 by ldavids          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "ServerConfig.hpp"
 
 //\\\\\\\\\\\\\\\\\\\\\\/LOCATION/\\\\\\\\\\\\\\\\\\\\\\\//
@@ -91,7 +79,7 @@ int		Location::check_first_word(std::string word, std::string block)
 	{
 		while (i > 0 && block[i] != '\n')
 		{
-			std::cout << block[i] << std::endl;
+			/*std::cout << block[i] << std::endl;*/
 			if (!isspace(block[i]))
 				return ((int)std::string::npos);
 			i--;
@@ -329,11 +317,6 @@ int				*ServerConfig::get_host()
 	return (_host);
 }
 
-/*std::string		ServerConfig::get_host_name()
-{
-	return (_host_name);
-}*/
-
 std::string		*ServerConfig::get_server_names()
 {
 	return (_server_names);
@@ -356,7 +339,6 @@ std::map<std::string, Location>		ServerConfig::get_location()
 
 void									ServerConfig::set_port(int x)
 {
-	/*std::cout << "set_port  = " << x <<std::endl;*/
 	_port = x;
 }
 
@@ -364,11 +346,6 @@ void									ServerConfig::set_host(int x, int y)
 {
 	_host[y] = x;
 }
-
-/*void									ServerConfig::set_host_name(std::string	host_name)
-{
-	_host_name = host_name;
-}*/
 
 void									ServerConfig::set_server_name(std::string	*names)
 {

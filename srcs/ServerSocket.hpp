@@ -41,6 +41,7 @@ class ServerSocket
 		int					establish_socket(int domain, int service, int protocol);
 		void				handle_connection(int client_sock, ServerConfig conf);
 		int					send_response(int client_sock);
+		void				remove_client(int i);
 
 	private:
 		ServerConfig 				_conf;

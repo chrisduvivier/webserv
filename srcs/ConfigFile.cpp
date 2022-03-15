@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFile.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.s19.be>           +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/03 15:33:18 by ldavids           #+#    #+#             */
-/*   Updated: 2022/03/14 15:18:40 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/03/15 15:00:41 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,6 @@ ConfigFile::ConfigFile(char *file)
 	inFile.close();
     str = clean_config(str); // cleaning (whitespaces, comments etc) and storing the config file
 	divide_servers(str); // dividing servers and checking the config file
-	/*std::cout << _server[0] << std::endl;
-	std::cout << _server[1] << std::endl;*/
 	parse_config();
 }
 
@@ -197,20 +195,12 @@ void	ConfigFile::parse_config()
 
 	while (x < _server_nb)
 	{
-		/*std::cout << "\nSERVER " << x << std::endl;*/
 		check_directives(x);
-		/*std::cout << _server[x] << std::endl;*/
 		listen(x);
-		/*std::cout << "listen[x] == " << _listen[x] << std::endl;*/
 		server_name(x);
-		/*std::cout << "server_name[x][0] == " << _server_name[x][0] << std::endl;*/
 		client_max_body_size(x);
-		/*std::cout << "client_max_body_size[x] == " << _client_max_body_size[x] << std::endl;*/
 		error_page(x);
 		location(x);
-		/*std::map<std::string, Location>::iterator it2;
-		it2 = _location[x].begin();
-		std::cout << "location = "<< it2->first << "\nblock = \n" << it2->second << std::endl;*/
 		x++;
 	}
 }
@@ -260,12 +250,6 @@ void	ConfigFile::server_name(int x)
 		_server_name[x][y].push_back(_server[x][i]);
 		i++;
 	}
-	/*i = 0;
-	while (i <= y)
-	{
-		std::cout <<"server_name[" << x << "][" << y << "] == " << _server_name[x][i] << std::endl;
-		i++;
-	}*/
 }
 
 void	ConfigFile::client_max_body_size(int x)
@@ -330,7 +314,7 @@ void	ConfigFile::error_page(int x)
 		}
 		while (_server[x][i] != '\n' && i < (int)_server[x].size())
 		{
-			std::cout << _server[x][i];
+			/*std::cout << _server[x][i];*/
 			if (isalnum(_server[x][i]) != 0)
 				error_exit("Config file : error in error_page directive\n");
 			i++;
@@ -345,8 +329,6 @@ void	ConfigFile::error_page(int x)
 	_error_pages[x].insert(std::pair<int, std::string>(415, "./public_html/error_pages/415.html"));
 	_error_pages[x].insert(std::pair<int, std::string>(500, "./public_html/error_pages/500.html"));
 	_error_pages[x].insert(std::pair<int, std::string>(501, "./public_html/error_pages/501.html"));
-	/*std::map<int, std::string>::iterator it1 = _error_pages[x].begin();
-	std::cout << "errorpage nb == " << it1->first << " errorpage path == " << it1->second << std::endl;*/
 }
 
 void			ConfigFile::location(int x)
@@ -362,12 +344,8 @@ void			ConfigFile::location(int x)
 		key = "";
 		path = "";
 		i = keyword("location", _server[x], i);
-		if (i == (int)std::string::npos) // create empty map to avoid segfault?
-		{
-			/*Location temp1("");
-			_location[x].insert(std::pair<std::string, Location>("", temp1));*/
+		if (i == (int)std::string::npos)
 			return ;
-		}
 		i += 8;
 		while (i < (int)_server[x].size())
 		{
@@ -571,7 +549,6 @@ void	ConfigFile::check_directives(int x)
 					std::cerr << "multiple max body size\n";
 				exit(1);
 			}
-			/*std::cout << "first word == " << word << std::endl;*/
 		}
 		if (_server[x][i] == '{')
 		{
