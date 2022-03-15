@@ -6,7 +6,7 @@
 /*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 15:10:03 by cduvivie          #+#    #+#             */
-/*   Updated: 2022/03/15 15:32:12 by cduvivie         ###   ########.fr       */
+/*   Updated: 2022/03/15 15:44:03 by cduvivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,10 +209,10 @@ int Server::run()
 					{
 						try {
 							send_response(i);
-							remove_client(i);
 						} catch (std::exception &e) {
 							std::cout << e.what() << std::endl;
 						}
+						remove_client(i);
 					}
 					close(i);
 					FD_CLR(i, &current_sockets);
