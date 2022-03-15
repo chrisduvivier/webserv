@@ -6,7 +6,7 @@
 #    By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/03/15 15:16:05 by cduvivie          #+#    #+#              #
-#    Updated: 2022/03/15 15:19:00 by cduvivie         ###   ########.fr        #
+#    Updated: 2022/03/15 15:21:01 by cduvivie         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,10 +22,6 @@ SRCS_SERVER		=	main_server.cpp	\
 					ConfigFile.cpp\
 					Cluster.cpp\
 
-SRCS_CLIENT		=	main_client.cpp	\
-					Socket.cpp ClientSocket.cpp \
-					utils.cpp \
-
 CPP			=	clang++
 
 CPPFLAGS		+=	-Wall -Wextra -Wextra -std=c++98
@@ -34,10 +30,9 @@ CPPFLAGS		+=	-Wall -Wextra -Wextra -std=c++98
 				$(CPP) $(CPPFLAGS) -c $<
 
 OBJS_SERVER		=	$(SRCS_SERVER:.cpp=.o)
-OBJS_CLIENT		=	$(SRCS_CLIENT:.cpp=.o)
 
 # defaults to server compilation
-all				:	server  client
+all				:	server
 server			: 	$(SERVER_NAME)
 $(SERVER_NAME)	:	$(OBJS_SERVER)
 				$(CPP) -o $(SERVER_NAME) $(CPPFLAGS) $(OBJS_SERVER)
@@ -46,7 +41,7 @@ san				:	$(OBJS_SERVER)
 					$(CPP) -o $(SERVER_NAME) -fsanitize=address $(CPPFLAGS) $(OBJS_SERVER)
 
 clean			:
-					rm -rf $(OBJS_SERVER) $(OBJS_CLIENT)
+					rm -rf $(OBJS_SERVER)
 
 fclean			:	clean
 					rm -f $(SERVER_NAME)
