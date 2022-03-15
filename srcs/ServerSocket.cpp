@@ -109,6 +109,12 @@ void	ServerSocket::remove_client(int i)
 	}
 }
 
+void signalHandler(int i) {
+	std::cout << "Interrupt signal received.\n";
+	close(i);
+	exit(1);  
+}
+
 /*
 **
 */
@@ -118,6 +124,7 @@ int ServerSocket::run()
 	fd_set		read_sockets;		// Also checked for new established connection
 	fd_set		write_sockets;
 	bool		new_connection = false;
+	std::signal(SIGINT, signalHandler);
 	std::vector<SimpleSocket>::iterator sock_iter = _socket_vector.begin();
 
 	// initialize my current set

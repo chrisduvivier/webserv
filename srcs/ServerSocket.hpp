@@ -18,6 +18,7 @@
 # include <sstream>
 # include <fcntl.h>
 # include <vector>
+# include <csignal>
 
 # include "utils.hpp"
 # include "HttpRequest.hpp"
