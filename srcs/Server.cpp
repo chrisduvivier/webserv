@@ -151,12 +151,12 @@ int Server::run()
 		struct timeval timeout; // for timeout
 		timeout.tv_sec = 3;
 		timeout.tv_usec = 0;
-		if (select(_max_fd, &read_sockets, &write_sockets, NULL, &timeout) < 0)
+		if (select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, &timeout) < 0)
 		{
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
-		for (int i = 0; i < _max_fd; i++) // TODO: possible improvement
+		for (int i = 0; i < FD_SETSIZE; i++) // TODO: possible improvement
 		{
 			if (_awaiting_send[i] == true && FD_ISSET(i, &write_sockets) && new_connection == false && send_answer == 1)
 			{
@@ -190,9 +190,9 @@ int Server::run()
 						if ((client_socket = accept(i, NULL, NULL)) < 0)
 						{
 							std::cout << "error: Socket accept" << std::endl;
-							/*close(i);
+							close(i);
 							remove_client(i);
-							FD_CLR(i, &current_sockets);*/
+							FD_CLR(i, &current_sockets);
 							return (-1);
 						}
 						FD_SET(client_socket, &current_sockets);
@@ -200,7 +200,7 @@ int Server::run()
 						sock_iter->_client.push_back(client_socket); // remember the client so we can id which server is linked to
 						new_connection = true;						 // signal to tell its a new connection
 						send_answer = 0;
-						break ;
+						/*break ;*/
 					}
 				}
 
