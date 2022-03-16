@@ -133,11 +133,13 @@ int Server::run()
 	std::signal(SIGINT, signalHandler);
 	std::vector<Socket>::iterator sock_iter = _socket_vector.begin();
 	int count = 0;
+	_max_fd = 0;
 	// initialize my current set
 	FD_ZERO(&current_sockets);
 	while (sock_iter != _socket_vector.end())
 	{
 		FD_SET(sock_iter->get_sock(), &current_sockets);
+		_max_fd = std::max(sock_iter->get_sock(), _max_fd);
 		DEBUG("Socket listening on port " + SSTR(ntohs(sock_iter->get_address().sin_port)));
 		sock_iter++;
 	}
@@ -150,17 +152,16 @@ int Server::run()
 		struct timeval timeout; // for timeout
 		timeout.tv_sec = 3;
 		timeout.tv_usec = 0;
-		if (select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, &timeout) < 0)
+		if (select(_max_fd, &read_sockets, &write_sockets, NULL, &timeout) < 0)
 		{
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
 		count++;
-		for (int i = 0; i < FD_SETSIZE; i++) // TODO: possible improvement
+		for (int i = 0; i < _max_fd; i++) // TODO: possible improvement
 		{
 			if (FD_ISSET(i, &write_sockets) && _awaiting_send[i] == true)
 			{
-				/*std::cout << "count write == " << count;*/
 				try
 				{
 					send_response(i);
@@ -173,6 +174,7 @@ int Server::run()
 				_awaiting_send[i] = false;
 				close(i);
 				FD_CLR(i, &current_sockets);
+				break ;
 			}
 
 			new_connection = false;			// reset
@@ -189,6 +191,7 @@ int Server::run()
 							return (-1);
 						}
 						FD_SET(client_socket, &current_sockets);
+						_max_fd = std::max(_max_fd, client_socket);
 						sock_iter->_client.push_back(client_socket); // remember the client so we can id which server is linked to
 						new_connection = true;						 // signal to tell its a new connection
 						continue;

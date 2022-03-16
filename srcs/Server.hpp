@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
+/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 15:10:00 by cduvivie          #+#    #+#             */
-/*   Updated: 2022/03/16 14:05:16 by ldavids          ###   ########.fr       */
+/*   Updated: 2022/03/16 15:07:46 by cduvivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ class Server
 		std::vector<Socket>	_socket_vector;
 		Cluster						_cluster;
 		bool						_awaiting_send[FD_SETSIZE];
+		int							_max_fd;
 };
 
 #endif
