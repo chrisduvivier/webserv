@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main_server.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cduvivie <cduvivie@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ldavids <ldavids@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 15:15:44 by cduvivie          #+#    #+#             */
-/*   Updated: 2022/03/15 15:15:50 by cduvivie         ###   ########.fr       */
+/*   Updated: 2022/03/16 14:50:11 by ldavids          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
 
 	// create a server socket instance and run it
 	Server Server(Server_vector, AF_INET, SOCK_STREAM, 0);
-
 	try {
 		Server.run();
 	} catch (std::exception& e) {
