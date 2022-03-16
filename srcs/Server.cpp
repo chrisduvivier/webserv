@@ -132,7 +132,6 @@ int Server::run()
 	bool new_connection = false;
 	std::signal(SIGINT, signalHandler);
 	std::vector<Socket>::iterator sock_iter = _socket_vector.begin();
-	int count = 0;
 	_max_fd = 0;
 	// initialize my current set
 	FD_ZERO(&current_sockets);
@@ -157,10 +156,9 @@ int Server::run()
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
-		count++;
 		for (int i = 0; i < _max_fd; i++) // TODO: possible improvement
 		{
-			if (FD_ISSET(i, &write_sockets) && _awaiting_send[i] == true)
+			if (_awaiting_send[i] == true && FD_ISSET(i, &write_sockets))
 			{
 				try
 				{
@@ -200,7 +198,7 @@ int Server::run()
 
 				if (new_connection == false)
 				{
-					if (FD_ISSET(i, &read_sockets) && _awaiting_send[i] == false) // read is ready
+					if (_awaiting_send[i] == false && FD_ISSET(i, &read_sockets)) // read is ready
 					{
 						int server_num = 0; // find which server (in the list sock_iter->_client) contains the fd ready to be handled
 						for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
@@ -222,7 +220,6 @@ int Server::run()
 							FD_CLR(i, &current_sockets);
 							_awaiting_send[i] = false;
 						}
-						continue;
 					}
 				}
 			}
