@@ -60,7 +60,7 @@ void Server::handle_connection(int client_sock, ServerConfig conf)
 	HttpRequest client_request;
 	std::string response;
 
-	usleep(1500);
+	usleep(1000);
 	bzero(&buffer, REQUEST_READ_BUFFER);
 	ret = read(client_sock, buffer, REQUEST_READ_BUFFER);
 	if (ret < 0 || ret == 0)
@@ -132,7 +132,7 @@ int Server::run()
 	bool new_connection = false;
 	std::signal(SIGINT, signalHandler);
 	std::vector<Socket>::iterator sock_iter = _socket_vector.begin();
-	int count = 0;
+	int send_answer = 0;
 	// initialize my current set
 	FD_ZERO(&current_sockets);
 	while (sock_iter != _socket_vector.end())
@@ -155,12 +155,10 @@ int Server::run()
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
-		count++;
 		for (int i = 0; i < FD_SETSIZE; i++) // TODO: possible improvement
 		{
-			if (FD_ISSET(i, &write_sockets) && _awaiting_send[i] == true)
+			if (_awaiting_send[i] == true && FD_ISSET(i, &write_sockets) && new_connection == false && send_answer == 1)
 			{
-				/*std::cout << "count write == " << count;*/
 				try
 				{
 					send_response(i);
@@ -173,6 +171,8 @@ int Server::run()
 				_awaiting_send[i] = false;
 				close(i);
 				FD_CLR(i, &current_sockets);
+				send_answer = 0;
+				break ;
 			}
 
 			new_connection = false;			// reset
@@ -182,17 +182,22 @@ int Server::run()
 				{
 					if (i == sock_iter->get_sock()) // new connection is established
 					{
-						int client_socket;
+						int client_socket = 0;
+						/*usleep(100);*/
 						if ((client_socket = accept(i, NULL, NULL)) < 0)
 						{
 							std::cout << "error: Socket accept" << std::endl;
+							/*close(i);
+							remove_client(i);
+							FD_CLR(i, &current_sockets);*/
 							return (-1);
 						}
 						FD_SET(client_socket, &current_sockets);
 						sock_iter->_client.push_back(client_socket); // remember the client so we can id which server is linked to
 						new_connection = true;						 // signal to tell its a new connection
-						continue;
+						send_answer = 0;
 					}
+					break ;
 				}
 
 				if (new_connection == false)
@@ -210,16 +215,17 @@ int Server::run()
 						{
 							handle_connection(i, _conf_vector[server_num]); // main function to handle requests
 							_awaiting_send[i] = true;
+							send_answer = 1;
 						}
 						catch (std::exception &e)
 						{
 							std::cout << e.what() << std::endl;
 							remove_client(i);
-							close(i); // remove client and pass to next fd
+							close(i); // remove client
 							FD_CLR(i, &current_sockets);
 							_awaiting_send[i] = false;
 						}
-						continue;
+						break ;
 					}
 				}
 			}
