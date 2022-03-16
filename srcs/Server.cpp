@@ -138,6 +138,7 @@ int Server::run()
 	while (sock_iter != _socket_vector.end())
 	{
 		FD_SET(sock_iter->get_sock(), &current_sockets);
+		_max_fd = std::max(sock_iter->get_sock(), _max_fd);
 		DEBUG("Socket listening on port " + SSTR(ntohs(sock_iter->get_address().sin_port)));
 		sock_iter++;
 	}
@@ -150,12 +151,12 @@ int Server::run()
 		struct timeval timeout; // for timeout
 		timeout.tv_sec = 3;
 		timeout.tv_usec = 0;
-		if (select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, &timeout) < 0)
+		if (select(_max_fd, &read_sockets, &write_sockets, NULL, &timeout) < 0)
 		{
 			std::cout << "error: select error" << std::endl;
 			return (-1);
 		}
-		for (int i = 0; i < FD_SETSIZE; i++) // TODO: possible improvement
+		for (int i = 0; i < _max_fd; i++) // TODO: possible improvement
 		{
 			if (_awaiting_send[i] == true && FD_ISSET(i, &write_sockets) && new_connection == false && send_answer == 1)
 			{
@@ -195,6 +196,7 @@ int Server::run()
 							return (-1);
 						}
 						FD_SET(client_socket, &current_sockets);
+						_max_fd = std::max(_max_fd, client_socket);
 						sock_iter->_client.push_back(client_socket); // remember the client so we can id which server is linked to
 						new_connection = true;						 // signal to tell its a new connection
 						send_answer = 0;
@@ -207,7 +209,7 @@ int Server::run()
 					/*std::cout << "handle" << std::endl;*/
 					if (FD_ISSET(i, &read_sockets) && _awaiting_send[i] == false) // read is ready
 					{
-						int server_num = 0; // find which server (in the list sock_iter->_client) contains the fd ready to be handled
+						int server_num = 0; // find which server (inƒ the list sock_iter->_client) contains the fd ready to be handled
 						for (sock_iter = _socket_vector.begin(); sock_iter != _socket_vector.end(); sock_iter++)
 						{
 							if (std::find(sock_iter->_client.begin(), sock_iter->_client.end(), i) != sock_iter->_client.end()) // search what server the client is linked to
