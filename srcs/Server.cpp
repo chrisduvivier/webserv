@@ -159,6 +159,7 @@ int Server::run()
 		{
 			if (_awaiting_send[i] == true && FD_ISSET(i, &write_sockets) && new_connection == false && send_answer == 1)
 			{
+				/*std::cout << "send" << std::endl;*/
 				try
 				{
 					send_response(i);
@@ -184,6 +185,7 @@ int Server::run()
 					{
 						int client_socket = 0;
 						/*usleep(100);*/
+						/*std::cout << "accept" << std::endl;*/
 						if ((client_socket = accept(i, NULL, NULL)) < 0)
 						{
 							std::cout << "error: Socket accept" << std::endl;
@@ -196,12 +198,13 @@ int Server::run()
 						sock_iter->_client.push_back(client_socket); // remember the client so we can id which server is linked to
 						new_connection = true;						 // signal to tell its a new connection
 						send_answer = 0;
+						break ;
 					}
-					break ;
 				}
 
 				if (new_connection == false)
 				{
+					/*std::cout << "handle" << std::endl;*/
 					if (FD_ISSET(i, &read_sockets) && _awaiting_send[i] == false) // read is ready
 					{
 						int server_num = 0; // find which server (in the list sock_iter->_client) contains the fd ready to be handled
