@@ -1,10 +1,20 @@
-# webserv WIP
-42 webserv project
+# Webserv
+This project consists of making our own HTTP server. The end product will handle GET/POST/DELETE requests, handle different ports, some simple CGI (only script in python3 in our case), and remains available (+99.5%) with siege stress test. Details of the subject can be found in `wesbserv_subject.pdf`. The projects runs on Mac OS/Linux. Code needed to comply with the C++ 98 standard (No external library and Boost libraries).
 
-# Starting point (main resources)
-- Read fantastic [guide](https://www.notion.so/Documentation-Webserv-320727979ffd4176a7dd5ba41aaadf46) made by former 42 students (written in French). Some take away from this guide:
-- [How to build a web client](https://www.youtube.com/watch?v=bdIiTxtMaKA&list=PL9IEJIKnBJjH_zM5LnovnoaKlXML5qh17&index=2) (Our `tcpclient.c` in the POC/mini_client folder is based on this video)
-- [How to build a web server]: see POC in the documentation
+## Credit:
+Thanks to: [@chrisduvivier](https://github.com/chrisduvivier)  [@Kovlin](https://github.com/Kovlin)    [@Sagaille](https://github.com/Sagaille)
+
+
+## Run
+Usage: `./webserv [configuration file (optional)]`
+Run `make` inside srcs directory. The executable `webserv` takes the `default.conf` as parameter if no conf file is provided. The PORT listening by default is 8050 and 8020.
+Once the webserv running, open on your browser [here](http://localhost:8050) (we recommend Safari or Google Chrome.)
+Tester: `srcs/tester.sh` provides some test to check basic functionalilty.
+
+## Starting point (main resources)
+- Read fantastic [guide](https://www.notion.so/Documentation-Webserv-320727979ffd4176a7dd5ba41aaadf46) made by former 42 students (written in French).
+- [How to build a web client (Jacob Sorber Youtube)](https://www.youtube.com/watch?v=bdIiTxtMaKA&list=PL9IEJIKnBJjH_zM5LnovnoaKlXML5qh17&index=1)
+- [How to build a web server (Jacob Sorber Youtube)](https://www.youtube.com/watch?v=esXw4bdaZkc&list=PL9IEJIKnBJjH_zM5LnovnoaKlXML5qh17&index=2)
 - One of the most detailed example program for non-blocking select: [example of IBM here](https://www.ibm.com/docs/en/i/7.2?topic=designs-example-nonblocking-io-select)
 - [Starting with HTTP Request](https://docstore.mik.ua/orelly/linux/cgi/ch02_01.htm)
 - [Starting with CGI](https://docstore.mik.ua/orelly/linux/cgi/ch03_01.htm)
@@ -25,3 +35,6 @@
 - Find out how there are defined: https://www.rfc-editor.org/rfc/rfc2616#section-4.1
 - Http Request: https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages#http_requests
 - Status code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
+### Flow of development:
+Our starting point was Jacob Sorber's tutorial on web client and web server (see the 2 links above). We immplemented ourselves, and we tried to get the request (a simple "Hello World" string) on our server, sent from our client. Next, find the necessary header (we then searched for HTML 1.1 Messages on RFC, a huge documentation about the HTML protocol), and make a parser of HttpRequest for a GET. Next was making the HttpResponse for GET. Next was POST. Then, implemented CGI (checked ressources listed above). Configuration file parsing -> Support for multiple server (multiple PORT) was added. 
