@@ -71,15 +71,7 @@ void Server::handle_connection(int client_sock, ServerConfig conf)
 	response = http_response.get_response();
 
 	// insert to map
-	if (_cluster._response_queue.find(client_sock) == _cluster._response_queue.end()) // dont exists
-	{
-		// create vector with 1 string inside for initilaization
-		std::vector<std::string> tmp;
-		tmp.push_back(response);
-		_cluster._response_queue.insert(std::pair<int, std::vector<std::string> >(client_sock, tmp));
-	}
-	else
-		_cluster._response_queue.find(client_sock)->second.push_back(response);
+	_cluster.insert(client_sock, response);
 }
 
 /*
@@ -87,15 +79,15 @@ void Server::handle_connection(int client_sock, ServerConfig conf)
 */
 int Server::send_response(int client_sock)
 {
-	if (_cluster._response_queue.find(client_sock) == _cluster._response_queue.end())
+	if (_cluster.find(client_sock) == false)
 		return (0);
-	std::string response = _cluster._response_queue.find(client_sock)->second.back();
+	std::string response = _cluster.get_queue(client_sock).back();
 	size_t response_size = response.length();
 
 	int res = send(client_sock, response.c_str(), response_size, 0);
 	if (res < 0 || res == 0)
 		throw ServerException("Exception: Error send: failed to send response to client");
-	_cluster._response_queue.find(client_sock)->second.pop_back(); // remove response only after successful send
+	_cluster.get_queue(client_sock).pop_back(); // remove response only after successful send
 	return (0);
 }
 
